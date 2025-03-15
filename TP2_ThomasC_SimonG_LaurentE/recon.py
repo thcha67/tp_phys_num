@@ -230,6 +230,22 @@ def reconFourierSlice():
 
     util.saveImage(image, "fft")
 
+def sinogramImage(file_name, filter=False):
+    sinogram = util.readSinogram(file_name)
+    image = np.zeros((sinogram[0], sinogram[1]))
+    data = sinogram[2]
+    filtered = ""
+
+    if filter:
+        data = CTfilter.filterSinogram(data)
+        filtered = "-filtered"
+    for i in range(len(data)):
+        for j in range(len(data[i])):
+            image[i, j] = data[i][j]
+
+
+    util.saveImage(image, f"sinogram{filtered}")
+
 
 ## main ##
 start_time = time.time()
@@ -246,7 +262,8 @@ start_time = time.time()
 # plt.subplot(1, 2, 2)
 # plt.imshow(sinogram, cmap='gray')
 # plt.show()
+sinogramImage("tp_phys_num/TP2_ThomasC_SimonG_LaurentE/data/sinogram-patient.txt", filter=False)
 
-reconFourierSlice() # on voit que l'image reconstruite est dézoomée, probablement à cause de l'interpolation
-print("--- %s seconds ---" % (time.time() - start_time))
+#reconFourierSlice() # on voit que l'image reconstruite est dézoomée, probablement à cause de l'interpolation
+#print("--- %s seconds ---" % (time.time() - start_time))
 
