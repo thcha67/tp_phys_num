@@ -33,4 +33,4 @@ voxsize = 0.2 # option: 0.4, 0.2
 dataDir = "./data/"
 anglesFile = "angles.txt"
 sinogramFile = "sinogram-password.txt"
-#sinogramFile = "sinogram-patient.txt"
+sinogramFile = "sinogram-patient.txt"
