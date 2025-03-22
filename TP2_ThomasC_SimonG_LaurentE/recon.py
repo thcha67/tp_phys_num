@@ -262,7 +262,7 @@ start_time = time.time()
 # plt.subplot(1, 2, 2)
 # plt.imshow(sinogram, cmap='gray')
 # plt.show()
-sinogramImage("tp_phys_num/TP2_ThomasC_SimonG_LaurentE/data/sinogram-patient.txt", filter=False)
+#sinogramImage("./tp_phys_num/TP2_ThomasC_SimonG_LaurentE/data/sinogram-patient.txt", filter=False)
 
 #reconFourierSlice() # on voit que l'image reconstruite est dézoomée, probablement à cause de l'interpolation
 #print("--- %s seconds ---" % (time.time() - start_time))
