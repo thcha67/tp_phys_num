@@ -42,3 +42,4 @@ def saveImage(image, prefix):
     plt.colorbar()
     plt.title("method: "+prefix)
     plt.savefig(prefix+"-"+time.strftime("%Y%m%d-%H%M%S")+".png")
+    plt.clf()
