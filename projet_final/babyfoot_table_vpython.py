@@ -71,6 +71,10 @@ maximal_dist_of_collision = ball_radius + np.sqrt(pwn_sz[0]**2 + pwn_sz[1]**2) #
 
 print("Press 'q' to quit the simulation.")
 
+
+# corner angles
+corner_angles = [0.983, 1.337, np.pi-1.337, np.pi-0.983] # in radians
+
 most_recent_pawn = None
 while True:
     rate(300)
@@ -101,8 +105,18 @@ while True:
         if pawn_to_ball_distance < maximal_dist_of_collision and most_recent_pawn != pwn:
             if abs(ball.pos.x - pwn.pos.x) < (ball.radius + pwn.size.x / 2) and abs(ball.pos.y - pwn.pos.y) < (ball.radius + pwn.size.y / 2):
                 x_pos, y_pos = -pawn_to_ball_vct.x, -pawn_to_ball_vct.y
-                angle = np.rad2deg(np.arctan2(y_pos, x_pos))
-                ball_velocity.x *= -1
+                incident_angle = np.arctan2(y_pos, x_pos)
+                
+                if ((corner_angles[0] < abs(incident_angle) < corner_angles[1]) or
+                    (corner_angles[2] < abs(incident_angle) < corner_angles[3])):
+                    print("corner")
+                elif corner_angles[1] < abs(incident_angle) < corner_angles[2]:
+                    print("y_rebound")
+                    ball_velocity.y *= -1
+                else:
+                    print("x_rebound")
+                    ball_velocity.x *= -1
+                time.sleep(1)
                 most_recent_pawn = pwn
             break
     
