@@ -38,8 +38,8 @@ table = box(pos=vector(0, 0, 0), size=vector(table_length, table_width, 0.1), co
 
 score_position = vector(0,table_width/2 + 100,10)
 score_box = box(pos=score_position, size=vector(500,100,0), color=color.gray(0.5))
-blue_score = text(text=f'Blue Team: {score[0]}', pos=score_position+vector(-225, 0, 0), height=25, color=color.blue)
-red_score = text(text=f'Red Team: {score[1]}', pos=score_position+vector(25, 0, 0), height=25, color=color.red)
+blue_score = text(text=f'Blue = {score[0]}', pos=score_position+vector(-225, 0, 0), height=25, color=color.blue)
+red_score = text(text=f'Red = {score[1]}', pos=score_position+vector(25, 0, 0), height=25, color=color.red)
 
 # Create the rods
 rods = [
@@ -82,6 +82,7 @@ print("Press 'q' to quit the simulation.")
 corner_angles = [0.983, 1.337, np.pi-1.337, np.pi-0.983] # in radians
 
 most_recent_pawn = None
+recent_goal = False
 while True:
     rate(300)
     # Move the ball
@@ -104,12 +105,13 @@ while True:
     #             ball_velocity.x = ball_min_velocity*math.copysign(1, ball_velocity.x)
 
     # Check for collisions with players
-    
+
     for pwn in pwns:
         pawn_to_ball_vct = pwn.pos - ball.pos
         pawn_to_ball_distance = mag(pawn_to_ball_vct)
         if pawn_to_ball_distance < maximal_dist_of_collision and most_recent_pawn != pwn:
             if abs(ball.pos.x - pwn.pos.x) < (ball.radius + pwn.size.x / 2) and abs(ball.pos.y - pwn.pos.y) < (ball.radius + pwn.size.y / 2):
+                recent_goal = False
                 x_pos, y_pos = -pawn_to_ball_vct.x, -pawn_to_ball_vct.y
                 center_to_center_angle = np.arctan2(y_pos, x_pos)
                 
@@ -126,17 +128,19 @@ while True:
                 else:
                     print("x_rebound")
                     ball_velocity.x *= -1
-
                 most_recent_pawn = pwn
             break
     
     net_number = 0
     for net in [net_blue, net_red]:
-        if abs(ball.pos.x - net.pos.x) < (ball.radius + net.size.x / 2) and abs(ball.pos.y - net.pos.y) < (ball.radius + net.size.y / 2):
-            if net_number == 0:
-                score[0] = score[0] + 1
-            else:
-                score[1] = score[1] + 1
-            print("GOAL")
-            print(score)
+        if not recent_goal:
+            if abs(ball.pos.x - net.pos.x) < (ball.radius + net.size.x / 2) and abs(ball.pos.y - net.pos.y) < (ball.radius + net.size.y / 2):
+                if net_number == 0:
+                    score[0] = score[0] + 1
+                    recent_goal = True
+                else:
+                    score[1] = score[1] + 1
+                    recent_goal = True
+                print("GOAL")
+                print(score)
         net_number += 1
