@@ -1,4 +1,4 @@
-from vpython import canvas, box, sphere, vector, color, rate, mag
+from vpython import canvas, box, sphere, vector, color, rate, mag, text
 import numpy as np
 import time
 
@@ -19,11 +19,12 @@ pwn_positions = [gk_pos, def_pos, mid_pos, att_pos]
 blue_rod_positions = [-525, -375, -72, 228] # gk, def, mid, att
 red_rod_positions = [525, 375, 72, -228]
 
-ball_initial_pos, ball_initial_velocity, ball_initial_dir = [0, 0], 100, [2, 0.5]
+ball_initial_pos, ball_initial_velocity, ball_initial_dir = [500, 0], 100, [2, 0.5]
 ball_max_velocity, ball_min_velocity, ball_radius = 15, 2, 16
 
 net_thickness, net_height, net_depth = 0.1, 204, 40
 rod_thickness = 5
+score = [0, 0]  #[blue team goals, red team goals]
 
 # Simulation parameters
 dt = 0.02
@@ -33,6 +34,12 @@ scene = canvas(title='Babyfoot Table', width=800, height=600)
 
 # Create the table
 table = box(pos=vector(0, 0, 0), size=vector(table_length, table_width, 0.1), color=color.green)
+
+
+score_position = vector(0,table_width/2 + 100,10)
+score_box = box(pos=score_position, size=vector(500,100,0), color=color.gray(0.5))
+blue_score = text(text=f'Blue Team: {score[0]}', pos=score_position+vector(-225, 0, 0), height=25, color=color.blue)
+red_score = text(text=f'Red Team: {score[1]}', pos=score_position+vector(25, 0, 0), height=25, color=color.red)
 
 # Create the rods
 rods = [
@@ -63,7 +70,6 @@ ball_velocity = vector(ball_initial_dir[0]*ball_initial_velocity, ball_initial_d
 # Create the nets behind each goalkeeper
 net_blue = box(pos=vector(-table_length/2-net_depth/2, 0, 0.15), size=vector(net_depth, net_height, net_thickness), color=color.white)
 net_red = box(pos=vector(table_length/2+net_depth/2, 0, 0.15), size=vector(net_depth, net_height, net_thickness), color=color.white)
-nets = [net_blue, net_red]
 
 
 
@@ -106,6 +112,13 @@ while True:
                 most_recent_pawn = pwn
             break
     
-    for net in nets:
+    net_number = 0
+    for net in [net_blue, net_red]:
         if abs(ball.pos.x - net.pos.x) < (ball.radius + net.size.x / 2) and abs(ball.pos.y - net.pos.y) < (ball.radius + net.size.y / 2):
+            if net_number == 0:
+                score[0] = score[0] + 1
+            else:
+                score[1] = score[1] + 1
             print("GOAL")
+            print(score)
+        net_number += 1
