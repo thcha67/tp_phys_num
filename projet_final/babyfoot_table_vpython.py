@@ -19,7 +19,7 @@ pawn_positions = [gk_pos, def_pos, mid_pos, att_pos]
 blue_rod_positions = [-525, -375, -72, 228] # gk, def, mid, att
 red_rod_positions = [525, 375, 72, -228]
 
-ball_initial_pos, ball_initial_velocity, ball_initial_dir = [500, 0], 100, [2, 0.5]
+ball_initial_pos, ball_initial_velocity, ball_initial_dir = [500, 0], 100, [1.3, 1.8]
 ball_max_velocity, ball_min_velocity, ball_radius = 15, 2, 16
 
 net_thickness, net_height, net_depth = 0.1, 204, 40
@@ -72,22 +72,44 @@ net_blue = box(pos=vector(-table_length/2-net_depth/2, 0, 0.15), size=vector(net
 net_red = box(pos=vector(table_length/2+net_depth/2, 0, 0.15), size=vector(net_depth, net_height, net_thickness), color=color.white)
 
 
-
-maximal_dist_of_collision = ball_radius + np.sqrt(pawn_sz[0]**2 + pawn_sz[1]**2) #maximal distance between the ball and the player to be considered as a collision
-
-print("Press 'q' to quit the simulation.")
+blue_pawns = [[pawns[0]], [defender for defender in pawns[1:3]], [mid for mid in pawns[3:8]], [att for att in pawns[8:11]]]
+red_pawns = [[pawns[11]], [defender for defender in pawns[12:14]], [mid for mid in pawns[14:19]], [att for att in pawns[19:22]]]
+def move_rod(teamNumber : int, rodNumber : int, mmDisplacement : int):
+    #team Number: 0 for blue, 1 for red
+    #rod Number : 0 = gk, 1 = def, 2 = mid, 3 = att
+    #mmDisplacement is positive to go up, or negative to go down
+    
+    rod_to_move = [blue_pawns, red_pawns][teamNumber][rodNumber]
+    
+    #check if movement is legal for all pawns
+    legality = []
+    if rodNumber == 0:
+        for pawn in rod_to_move:
+            if pawn.pos.y < net_height/2 and pawn.pos.y > -net_height/2:
+                    legality.append(True)
+    else:
+        for pawn in rod_to_move:
+            if pawn.pos.y < table_width/2 and pawn.pos.y > -table_width/2:
+                    legality.append(True)
+    
+    #if movement is legal, move all pawns on the rod
+    if len(legality) == len(rod_to_move):
+        for pawn in rod_to_move:
+            pawn.pos += vector(0, mmDisplacement, 0)
 
 
 # corner angles
-# corners are 3mm from the edge of the pawn and for a quarter circle.
+maximal_dist_of_collision = ball_radius + np.sqrt(pawn_sz[0]**2 + pawn_sz[1]**2) #maximal distance between the ball and the player to be considered as a collision
 corner_angles = [0.983, 1.337, np.pi-1.337, np.pi-0.983] # in radians
+print("Press 'q' to quit the simulation.")
 
 most_recent_pawn = None
 recent_goal = False
 while True:
-    rate(300)
+    rate(600)
     # Move the ball
     ball.pos += ball_velocity * dt
+    ball_velocity.x, ball_velocity.y = ball_velocity.x*(1-dt/40), ball_velocity.y*(1-dt/40)
 
     # Check for collisions with table boundaries
     if abs(ball.pos.x) > table_length/2:
