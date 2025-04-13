@@ -1,4 +1,4 @@
-from vpython import canvas, box, sphere, vector, color, rate, mag, text, label
+from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
 import time
 
@@ -136,24 +136,38 @@ while True:
     for pawn in pawns:
         pawn_to_ball_vct = pawn.pos - ball.pos
         pawn_to_ball_distance = mag(pawn_to_ball_vct)
-        if pawn_to_ball_distance < maximal_dist_of_collision and most_recent_pawn != pawn:
+
+        # check if the ball is close enough that it could touch in the right angle and if the pawn is not the most recent pawn to touch the ball
+        if pawn_to_ball_distance < maximal_dist_of_collision and most_recent_pawn != pawn: 
+
+            # check if it really touches at the particular spot on the pawn
             if abs(ball.pos.x - pawn.pos.x) < (ball.radius + pawn.size.x / 2) and abs(ball.pos.y - pawn.pos.y) < (ball.radius + pawn.size.y / 2):
                 recent_goal = False
+
                 x_pos, y_pos = -pawn_to_ball_vct.x, -pawn_to_ball_vct.y
                 center_to_center_angle = np.arctan2(y_pos, x_pos)
                 
                 if ((corner_angles[0] < abs(center_to_center_angle) < corner_angles[1]) or
                     (corner_angles[2] < abs(center_to_center_angle) < corner_angles[3])):
-                    final_angle = 2*center_to_center_angle - np.arctan2(ball_velocity.y, ball_velocity.x)
-                    # ball_velocity.x = ball_velocity.x * np.cos(final_angle)
-                    # ball_velocity.y = ball_velocity.y * np.sin(final_angle) 
-                    print("corner")
+
+                    incoming_velocity = mag(ball_velocity)
+                    incoming_angle = np.arctan2(ball_velocity.y, ball_velocity.x)
+
+                    # calculate the angle between the center of the circlar corners of the pawn and the center of the ball
+                    center_of_circular_corner = pawn.pos + vector(2.5, 8.5, 0)
+                    normal_angle = np.arctan2(ball.pos.y - center_of_circular_corner.y, ball.pos.x - center_of_circular_corner.x)
+
+                    outcoming_angle = 2*normal_angle - incoming_angle - np.pi
+
+                    print(normal_angle, center_to_center_angle)
+
+                    ball_velocity.x = incoming_velocity*np.cos(outcoming_angle)
+                    ball_velocity.y = incoming_velocity*np.sin(outcoming_angle)
+
 
                 elif corner_angles[1] < abs(center_to_center_angle) < corner_angles[2]:
-                    print("y_rebound")
                     ball_velocity.y *= -1
                 else:
-                    print("x_rebound")
                     ball_velocity.x *= -1
                 most_recent_pawn = pawn
             break
