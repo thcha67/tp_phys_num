@@ -1,11 +1,11 @@
-from vpython import canvas, box, sphere, vector, color, rate, mag, text
+from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow
 import numpy as np
 import time
 
 #toutes les mesures sont en mm (x, y, z)
 
 table_length, table_width = 1140, 700
-pwn_sz = np.array([11, 21, 1])
+pawn_sz = np.array([11, 21, 1])
 
 sep_def, sep_mid, sep_att = 335, 122, 215  #separation head to head between players
 
@@ -14,7 +14,7 @@ def_pos = [-sep_def/2, sep_def/2]
 mid_pos = [-2*sep_mid, -sep_mid, 0, sep_mid, 2*sep_mid]
 att_pos = [-sep_att, 0, sep_att]
 
-pwn_positions = [gk_pos, def_pos, mid_pos, att_pos]
+pawn_positions = [gk_pos, def_pos, mid_pos, att_pos]
 
 blue_rod_positions = [-525, -375, -72, 228] # gk, def, mid, att
 red_rod_positions = [525, 375, 72, -228]
@@ -48,17 +48,17 @@ rods = [
 ]
 
 # Create the players
-pwns: list[box] = []
+pawns: list[box] = []
 
 # blue
 for i, rod_pos in enumerate(blue_rod_positions):
-    for pwn_pos in pwn_positions[i]:
-        pwns.append(box(pos=vector(rod_pos, pwn_pos, 0.15), size=vector(pwn_sz[0], pwn_sz[1], 1), color=color.blue))
+    for pawn_pos in pawn_positions[i]:
+        pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(pawn_sz[0], pawn_sz[1], 1), color=color.blue))
 
 # red
 for i, rod_pos in enumerate(red_rod_positions):
-    for pwn_pos in pwn_positions[i]:
-        pwns.append(box(pos=vector(rod_pos, pwn_pos, 0.15), size=vector(pwn_sz[0], pwn_sz[1], 1), color=color.red))
+    for pawn_pos in pawn_positions[i]:
+        pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(pawn_sz[0], pawn_sz[1], 1), color=color.red))
 
 
 # Create the ball at the specified position
@@ -73,12 +73,13 @@ net_red = box(pos=vector(table_length/2+net_depth/2, 0, 0.15), size=vector(net_d
 
 
 
-maximal_dist_of_collision = ball_radius + np.sqrt(pwn_sz[0]**2 + pwn_sz[1]**2) #maximal distance between the ball and the player to be considered as a collision
+maximal_dist_of_collision = ball_radius + np.sqrt(pawn_sz[0]**2 + pawn_sz[1]**2) #maximal distance between the ball and the player to be considered as a collision
 
 print("Press 'q' to quit the simulation.")
 
 
 # corner angles
+# corners are 3mm from the edge of the pawn and for a quarter circle.
 corner_angles = [0.983, 1.337, np.pi-1.337, np.pi-0.983] # in radians
 
 most_recent_pawn = None
@@ -96,8 +97,8 @@ while True:
         ball_velocity.y *= -1
         most_recent_pawn = None
 
-    # for pwn in pwns:
-    #     if abs(ball.pos.x - pwn.pos.x) < (ball.radius + pwn.size.x / 2) and abs(ball.pos.y - pwn.pos.y) < (ball.radius + pwn.size.y / 2):
+    # for pawn in pawns:
+    #     if abs(ball.pos.x - pawn.pos.x) < (ball.radius + pawn.size.x / 2) and abs(ball.pos.y - pawn.pos.y) < (ball.radius + pawn.size.y / 2):
     #         ball_velocity.x *= -(np.random.uniform(0.2, 2))
     #         if abs(ball_velocity.x) > ball_max_velocity:
     #             ball_velocity.x = ball_max_velocity*math.copysign(1, ball_velocity.x)
@@ -106,29 +107,43 @@ while True:
 
     # Check for collisions with players
 
-    for pwn in pwns:
-        pawn_to_ball_vct = pwn.pos - ball.pos
+    for pawn in pawns:
+        pawn_to_ball_vct = pawn.pos - ball.pos
         pawn_to_ball_distance = mag(pawn_to_ball_vct)
-        if pawn_to_ball_distance < maximal_dist_of_collision and most_recent_pawn != pwn:
-            if abs(ball.pos.x - pwn.pos.x) < (ball.radius + pwn.size.x / 2) and abs(ball.pos.y - pwn.pos.y) < (ball.radius + pwn.size.y / 2):
+
+        # check if the ball is close enough that it could touch in the right angle and if the pawn is not the most recent pawn to touch the ball
+        if pawn_to_ball_distance < maximal_dist_of_collision and most_recent_pawn != pawn: 
+
+            # check if it really touches at the particular spot on the pawn
+            if abs(ball.pos.x - pawn.pos.x) < (ball.radius + pawn.size.x / 2) and abs(ball.pos.y - pawn.pos.y) < (ball.radius + pawn.size.y / 2):
                 recent_goal = False
+
                 x_pos, y_pos = -pawn_to_ball_vct.x, -pawn_to_ball_vct.y
                 center_to_center_angle = np.arctan2(y_pos, x_pos)
                 
                 if ((corner_angles[0] < abs(center_to_center_angle) < corner_angles[1]) or
                     (corner_angles[2] < abs(center_to_center_angle) < corner_angles[3])):
-                    final_angle = 2*center_to_center_angle - np.arctan2(ball_velocity.y, ball_velocity.x)
-                    # ball_velocity.x = ball_velocity.x * np.cos(final_angle)
-                    # ball_velocity.y = ball_velocity.y * np.sin(final_angle) 
-                    print("corner")
+
+                    incoming_velocity = mag(ball_velocity)
+                    incoming_angle = np.arctan2(ball_velocity.y, ball_velocity.x)
+
+                    # calculate the angle between the center of the circlar corners of the pawn and the center of the ball
+                    center_of_circular_corner = pawn.pos + vector(2.5, 8.5, 0)
+                    normal_angle = np.arctan2(ball.pos.y - center_of_circular_corner.y, ball.pos.x - center_of_circular_corner.x)
+
+                    outcoming_angle = 2*normal_angle - incoming_angle - np.pi
+
+                    print(normal_angle, center_to_center_angle)
+
+                    ball_velocity.x = incoming_velocity*np.cos(outcoming_angle)
+                    ball_velocity.y = incoming_velocity*np.sin(outcoming_angle)
+
 
                 elif corner_angles[1] < abs(center_to_center_angle) < corner_angles[2]:
-                    print("y_rebound")
                     ball_velocity.y *= -1
                 else:
-                    print("x_rebound")
                     ball_velocity.x *= -1
-                most_recent_pawn = pwn
+                most_recent_pawn = pawn
             break
     
     net_number = 0
