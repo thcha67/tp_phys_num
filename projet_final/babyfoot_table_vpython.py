@@ -1,13 +1,35 @@
 from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
 import time
+import json
 
 #toutes les mesures sont en mm (x, y, z)
 
-table_length, table_width = 1140, 700
-pawn_sz = np.array([11, 21, 1])
+with open("table_config.json", "r") as f:
+    table_config = json.load(f)
 
-sep_def, sep_mid, sep_att = 335, 122, 215  #separation head to head between players
+table_length = table_config["table_length"]
+table_width = table_config["table_width"]
+pawn_size = table_config["pawn_size"]
+sep_def, sep_mid, sep_att = table_config["pawn_separation"]
+blue_rod_positions = table_config["blue_rod_positions"]
+red_rod_positions = table_config["red_rod_positions"]
+rod_thickness = table_config["rod_thickness"]
+net_thickness = table_config["net_thickness"]
+net_width = table_config["net_width"]
+net_depth = table_config["net_depth"]
+ball_radius = table_config["ball_radius"]
+
+with open("simulation_config.json", "r") as f:
+    simulation_config = json.load(f)
+
+dt = simulation_config["dt"]
+ball_initial_position = simulation_config["ball_initial_position"]
+ball_initial_velocity_magnitude = simulation_config["ball_initial_velocity_magnitude"]
+ball_initial_velocity_angle = simulation_config["ball_initial_velocity_angle"]
+ball_max_velocity = simulation_config["ball_max_velocity"]
+ball_friction_coefficient = simulation_config["ball_friction_coefficient"]
+
 
 gk_pos = [0]
 def_pos = [-sep_def/2, sep_def/2]
@@ -16,18 +38,8 @@ att_pos = [-sep_att, 0, sep_att]
 
 pawn_positions = [gk_pos, def_pos, mid_pos, att_pos]
 
-blue_rod_positions = [-525, -375, -72, 228] # gk, def, mid, att
-red_rod_positions = [525, 375, 72, -228]
-
-ball_initial_pos, ball_initial_velocity, ball_initial_dir = [500, 0], 100, [1.3, 1.8]
-ball_max_velocity, ball_min_velocity, ball_radius = 15, 2, 16
-
-net_thickness, net_height, net_depth = 0.1, 204, 40
-rod_thickness = 5
 score = [0, 0]  #[blue team goals, red team goals]
 
-# Simulation parameters
-dt = 0.02
 
 # Set up the scene
 scene = canvas(title='Babyfoot Table', width=800, height=600)
@@ -52,27 +64,26 @@ pawns: list[box] = []
 # blue
 for i, rod_pos in enumerate(blue_rod_positions):
     for pawn_pos in pawn_positions[i]:
-        pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(pawn_sz[0], pawn_sz[1], 1), color=color.blue))
+        pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(pawn_size[0], pawn_size[1], 1), color=color.blue))
 
 # red
 for i, rod_pos in enumerate(red_rod_positions):
     for pawn_pos in pawn_positions[i]:
-        pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(pawn_sz[0], pawn_sz[1], 1), color=color.red))
+        pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(pawn_size[0], pawn_size[1], 1), color=color.red))
 
 
 # Create the ball at the specified position
-ball = sphere(pos=vector(ball_initial_pos[0], ball_initial_pos[1], 0.15), radius=ball_radius, color=color.white)
-ball_initial_dir = [element / np.sqrt(ball_initial_dir[0]**2 + ball_initial_dir[1]**2) for element in ball_initial_dir]
-ball_velocity = vector(ball_initial_dir[0]*ball_initial_velocity, ball_initial_dir[1]*ball_initial_velocity, 0)
-
+ball = sphere(pos=vector(ball_initial_position[0], ball_initial_position[1], 0.15), radius=ball_radius, color=color.white)
+ball_velocity = vector(ball_initial_velocity_magnitude*np.cos(ball_initial_velocity_angle), ball_initial_velocity_magnitude*np.sin(ball_initial_velocity_angle), 0)
 
 # Create the nets behind each goalkeeper
-net_blue = box(pos=vector(-table_length/2-net_depth/2, 0, 0.15), size=vector(net_depth, net_height, net_thickness), color=color.white)
-net_red = box(pos=vector(table_length/2+net_depth/2, 0, 0.15), size=vector(net_depth, net_height, net_thickness), color=color.white)
+net_blue = box(pos=vector(-table_length/2-net_depth/2, 0, 0.15), size=vector(net_depth, net_width, net_thickness), color=color.white)
+net_red = box(pos=vector(table_length/2+net_depth/2, 0, 0.15), size=vector(net_depth, net_width, net_thickness), color=color.white)
 
 
 blue_pawns = [[pawns[0]], [defender for defender in pawns[1:3]], [mid for mid in pawns[3:8]], [att for att in pawns[8:11]]]
 red_pawns = [[pawns[11]], [defender for defender in pawns[12:14]], [mid for mid in pawns[14:19]], [att for att in pawns[19:22]]]
+
 def move_rod(teamNumber : int, rodNumber : int, mmDisplacement : int):
     #team Number: 0 for blue, 1 for red
     #rod Number : 0 = gk, 1 = def, 2 = mid, 3 = att
@@ -84,7 +95,7 @@ def move_rod(teamNumber : int, rodNumber : int, mmDisplacement : int):
     legality = []
     if rodNumber == 0:
         for pawn in rod_to_move:
-            if pawn.pos.y < net_height/2 and pawn.pos.y > -net_height/2:
+            if pawn.pos.y < net_width/2 and pawn.pos.y > -net_width/2:
                     legality.append(True)
     else:
         for pawn in rod_to_move:
@@ -101,9 +112,8 @@ def update_score(teamNumber : int):
     blue_label.text = f"{score[0]}    :   {score[1]}"
 
 # corner angles
-maximal_dist_of_collision = ball_radius + np.sqrt(pawn_sz[0]**2 + pawn_sz[1]**2) #maximal distance between the ball and the player to be considered as a collision
+maximal_dist_of_collision = ball_radius + np.sqrt(pawn_size[0]**2 + pawn_size[1]**2) #maximal distance between the ball and the player to be considered as a collision
 corner_angles = [0.983, 1.337, np.pi-1.337, np.pi-0.983] # in radians
-print("Press 'q' to quit the simulation.")
 
 most_recent_pawn = None
 recent_goal = False
@@ -111,9 +121,10 @@ while True:
     rate(600)
     # Move the ball
     ball.pos += ball_velocity * dt
-
-
-    ## ball_velocity.x, ball_velocity.y = ball_velocity.x*(1-dt/40), ball_velocity.y*(1-dt/40)
+    
+    # apply friction, 0 = no friction
+    ball_velocity.x = (1 - ball_friction_coefficient*dt) * ball_velocity.x
+    ball_velocity.y = (1 - ball_friction_coefficient*dt) * ball_velocity.y
 
     # Check for collisions with table boundaries
     if abs(ball.pos.x) > table_length/2:
@@ -123,24 +134,14 @@ while True:
         ball_velocity.y *= -1
         most_recent_pawn = None
 
-    # for pawn in pawns:
-    #     if abs(ball.pos.x - pawn.pos.x) < (ball.radius + pawn.size.x / 2) and abs(ball.pos.y - pawn.pos.y) < (ball.radius + pawn.size.y / 2):
-    #         ball_velocity.x *= -(np.random.uniform(0.2, 2))
-    #         if abs(ball_velocity.x) > ball_max_velocity:
-    #             ball_velocity.x = ball_max_velocity*math.copysign(1, ball_velocity.x)
-    #         elif abs(ball_velocity.x) < ball_min_velocity:
-    #             ball_velocity.x = ball_min_velocity*math.copysign(1, ball_velocity.x)
-
     # Check for collisions with players
-
     for pawn in pawns:
         pawn_to_ball_vct = pawn.pos - ball.pos
         pawn_to_ball_distance = mag(pawn_to_ball_vct)
 
         # check if the ball is close enough that it could touch in the right angle and if the pawn is not the most recent pawn to touch the ball
         if pawn_to_ball_distance < maximal_dist_of_collision and most_recent_pawn != pawn: 
-
-            # check if it really touches at the particular spot on the pawn
+            # check what part of the pawn is touching the ball (the corners or the sides)
             if abs(ball.pos.x - pawn.pos.x) < (ball.radius + pawn.size.x / 2) and abs(ball.pos.y - pawn.pos.y) < (ball.radius + pawn.size.y / 2):
                 recent_goal = False
 
