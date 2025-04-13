@@ -61,3 +61,16 @@ BALL_INITIAL_VELOCITY_MAGNITUDE = simulation_config["ball_initial_velocity_magni
 BALL_INITIAL_VELOCITY_ANGLE = simulation_config["ball_initial_velocity_angle"]
 BALL_MAX_VELOCITY = simulation_config["ball_max_velocity"]
 BALL_FRICTION_COEFFICIENT = simulation_config["ball_friction_coefficient"]
+
+
+not_exportable = [
+    "DEFAULT_TABLE_CONFIG",
+    "DEFAULT_SIMULATION_CONFIG",
+    "table_config",
+    "simulation_config",
+]
+
+# When using `from config import *`, we want to export all variables except the ones in `not_exportable`
+__all__ = [
+    config_option for config_option in dir() if config_option not in not_exportable
+]

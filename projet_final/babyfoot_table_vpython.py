@@ -4,34 +4,6 @@ import time
 
 from config import *
 
-#toutes les mesures sont en mm (x, y, z)
-
-# with open("table_config.json", "r") as f:
-#     table_config = json.load(f)
-
-# table_length = table_config["table_length"]
-# table_width = table_config["table_width"]
-# pawn_size = table_config["pawn_size"]
-# sep_def, sep_mid, sep_att = table_config["pawn_separation"]
-# blue_rod_positions = table_config["blue_rod_positions"]
-# red_rod_positions = table_config["red_rod_positions"]
-# rod_thickness = table_config["rod_thickness"]
-# net_thickness = table_config["net_thickness"]
-# net_width = table_config["net_width"]
-# net_depth = table_config["net_depth"]
-# ball_radius = table_config["ball_radius"]
-
-# with open("simulation_config.json", "r") as f:
-#     simulation_config = json.load(f)
-
-# dt = simulation_config["dt"]
-# ball_initial_position = simulation_config["ball_initial_position"]
-# ball_initial_velocity_magnitude = simulation_config["ball_initial_velocity_magnitude"]
-# ball_initial_velocity_angle = simulation_config["ball_initial_velocity_angle"]
-# ball_max_velocity = simulation_config["ball_max_velocity"]
-# ball_friction_coefficient = simulation_config["ball_friction_coefficient"]
-
-
 gk_pos = [0]
 def_pos = [-SEP_DEF/2, SEP_DEF/2]
 mid_pos = [-2*SEP_MID, -SEP_MID, 0, SEP_MID, 2*SEP_MID]
