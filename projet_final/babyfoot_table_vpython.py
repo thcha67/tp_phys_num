@@ -105,7 +105,7 @@ while True:
     #             ball_velocity.x = ball_min_velocity*math.copysign(1, ball_velocity.x)
 
     # Check for collisions with players
-    
+
     for pwn in pwns:
         pawn_to_ball_vct = pwn.pos - ball.pos
         pawn_to_ball_distance = mag(pawn_to_ball_vct)
@@ -113,12 +113,16 @@ while True:
             if abs(ball.pos.x - pwn.pos.x) < (ball.radius + pwn.size.x / 2) and abs(ball.pos.y - pwn.pos.y) < (ball.radius + pwn.size.y / 2):
                 recent_goal = False
                 x_pos, y_pos = -pawn_to_ball_vct.x, -pawn_to_ball_vct.y
-                incident_angle = np.arctan2(y_pos, x_pos)
+                center_to_center_angle = np.arctan2(y_pos, x_pos)
                 
-                if ((corner_angles[0] < abs(incident_angle) < corner_angles[1]) or
-                    (corner_angles[2] < abs(incident_angle) < corner_angles[3])):
+                if ((corner_angles[0] < abs(center_to_center_angle) < corner_angles[1]) or
+                    (corner_angles[2] < abs(center_to_center_angle) < corner_angles[3])):
+                    final_angle = 2*center_to_center_angle - np.arctan2(ball_velocity.y, ball_velocity.x)
+                    # ball_velocity.x = ball_velocity.x * np.cos(final_angle)
+                    # ball_velocity.y = ball_velocity.y * np.sin(final_angle) 
                     print("corner")
-                elif corner_angles[1] < abs(incident_angle) < corner_angles[2]:
+
+                elif corner_angles[1] < abs(center_to_center_angle) < corner_angles[2]:
                     print("y_rebound")
                     ball_velocity.y *= -1
                 else:
