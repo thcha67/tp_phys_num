@@ -109,7 +109,7 @@ while True:
     rate(600)
     # Move the ball
     ball.pos += ball_velocity * dt
-    ball_velocity.x, ball_velocity.y = ball_velocity.x*(1-dt/40), ball_velocity.y*(1-dt/40)
+    # ball_velocity.x, ball_velocity.y = ball_velocity.x*(1-dt/40), ball_velocity.y*(1-dt/40)
 
     # Check for collisions with table boundaries
     if abs(ball.pos.x) > table_length/2:
@@ -154,8 +154,6 @@ while True:
                     normal_angle = np.arctan2(ball.pos.y - center_of_circular_corner.y, ball.pos.x - center_of_circular_corner.x)
 
                     outcoming_angle = 2*normal_angle - incoming_angle - np.pi
-
-                    print(normal_angle, center_to_center_angle)
 
                     ball_velocity.x = incoming_velocity*np.cos(outcoming_angle)
                     ball_velocity.y = incoming_velocity*np.sin(outcoming_angle)
