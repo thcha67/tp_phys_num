@@ -1,4 +1,4 @@
-from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow
+from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
 import time
 
@@ -38,8 +38,7 @@ table = box(pos=vector(0, 0, 0), size=vector(table_length, table_width, 0.1), co
 
 score_position = vector(0,table_width/2 + 100,10)
 score_box = box(pos=score_position, size=vector(500,100,0), color=color.gray(0.5))
-blue_score = text(text=f'Blue = {score[0]}', pos=score_position+vector(-225, 0, 0), height=25, color=color.blue)
-red_score = text(text=f'Red = {score[1]}', pos=score_position+vector(25, 0, 0), height=25, color=color.red)
+blue_label = label(pos=score_box.pos, text=f"{score[0]}    :   {score[1]}", xoffset=0, yoffset=0, space=score_box.size.x, height=25, border=4, font='sans')
 
 # Create the rods
 rods = [
@@ -97,6 +96,9 @@ def move_rod(teamNumber : int, rodNumber : int, mmDisplacement : int):
         for pawn in rod_to_move:
             pawn.pos += vector(0, mmDisplacement, 0)
 
+def update_score(teamNumber : int):
+    score[teamNumber] = score[teamNumber] + 1
+    blue_label.text = f"{score[0]}    :   {score[1]}"
 
 # corner angles
 maximal_dist_of_collision = ball_radius + np.sqrt(pawn_sz[0]**2 + pawn_sz[1]**2) #maximal distance between the ball and the player to be considered as a collision
@@ -109,7 +111,9 @@ while True:
     rate(600)
     # Move the ball
     ball.pos += ball_velocity * dt
-    # ball_velocity.x, ball_velocity.y = ball_velocity.x*(1-dt/40), ball_velocity.y*(1-dt/40)
+
+
+    ## ball_velocity.x, ball_velocity.y = ball_velocity.x*(1-dt/40), ball_velocity.y*(1-dt/40)
 
     # Check for collisions with table boundaries
     if abs(ball.pos.x) > table_length/2:
@@ -171,10 +175,10 @@ while True:
         if not recent_goal:
             if abs(ball.pos.x - net.pos.x) < (ball.radius + net.size.x / 2) and abs(ball.pos.y - net.pos.y) < (ball.radius + net.size.y / 2):
                 if net_number == 0:
-                    score[0] = score[0] + 1
+                    update_score(0)
                     recent_goal = True
                 else:
-                    score[1] = score[1] + 1
+                    update_score(1)
                     recent_goal = True
                 print("GOAL")
                 print(score)
