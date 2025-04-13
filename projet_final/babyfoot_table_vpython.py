@@ -19,7 +19,7 @@ pwn_positions = [gk_pos, def_pos, mid_pos, att_pos]
 blue_rod_positions = [-525, -375, -72, 228] # gk, def, mid, att
 red_rod_positions = [525, 375, 72, -228]
 
-ball_initial_pos, ball_initial_velocity, ball_initial_dir = [500, 0], 100, [2, 0.5]
+ball_initial_pos, ball_initial_velocity, ball_initial_dir = [500, 0], 100, [1.3, 1.8]
 ball_max_velocity, ball_min_velocity, ball_radius = 15, 2, 16
 
 net_thickness, net_height, net_depth = 0.1, 204, 40
