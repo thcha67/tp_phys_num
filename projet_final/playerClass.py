@@ -1,5 +1,6 @@
 from vpython import sphere, vector, box
 from config import *
+import math
 
 class player():
     
@@ -54,29 +55,30 @@ class player():
         mmDisplacement = []
         for hand in self.handPositions:
             rod_pos_x = rod_positions[hand]
-            delta_x = ball.pos.x - rod_pos_x
             rod_pawns = pawns[hand]
-
-            if ball_velocity.x * delta_x > 0: #s'ils ont pas le même signe!
+            
+            delta_x = ball.pos.x - rod_pos_x
+            y_position_at_rod = delta_x * ball_velocity.y/abs(ball_velocity.x) + ball.pos.y
+            
+            if (teamNumber == 0 and ball_velocity.x > 0) or (teamNumber == 1 and ball_velocity.x < 0):
                 mmDisplacement.append(0) #la balle ne se déplace pas vers le joueur, donc bouge pas le pawn
                 continue
-
-            if ball_velocity.x > 0 and teamNumber == 0:
-                mmDisplacement.append(0)
+            elif (teamNumber == 0 and ball.pos.x < rod_pos_x) or (teamNumber == 1 and ball.pos.x > rod_pos_x):
+                mmDisplacement.append(0) #la balle est derrière le joueur, donc bouge pas le pawn
                 continue
-            elif ball_velocity.x < 0 and teamNumber == 1:
-                mmDisplacement.append(0)
-                continue
-            
-            future_ball_position_at_rod= delta_x * ball_velocity.y / ball_velocity.x + ball.pos.y
-            index_of_closest_pawn, distance_closest_pawn = 0, 1000
-            for i in range(len(rod_pawns)):
-                if rod_pawns[i].pos.y - future_ball_position_at_rod < distance_closest_pawn:
-                    index_of_closest_pawn = i
-            
 
-            mmDisplacement.append(min(future_ball_position_at_rod - rod_pawns[index_of_closest_pawn].pos.y, self.reflexes))
-        
+            nearest_pawn, nearest_y_value = 0, 100000
+            for pawn in rod_pawns:
+                if abs(y_position_at_rod - pawn.pos.y) < nearest_y_value:
+                    nearest_y_value = abs(y_position_at_rod - pawn.pos.y)
+                    nearest_pawn = pawn
+
+            delta_y = y_position_at_rod - nearest_pawn.pos.y
+            if abs(delta_y) < self.reflexes:
+                mmDisplacement.append(math.copysign(self.reflexes, delta_y))
+            else:
+                mmDisplacement.append(delta_y)
+
         return mmDisplacement
         
 

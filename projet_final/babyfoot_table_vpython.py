@@ -93,7 +93,7 @@ corner_angles = [0.983, 1.337, np.pi-1.337, np.pi-0.983] # in radians
 most_recent_pawn = None
 recent_goal = False
 while True:
-    rate(25)
+    rate(50)
     # Move the ball
     ball.pos += ball_velocity * DT
     
