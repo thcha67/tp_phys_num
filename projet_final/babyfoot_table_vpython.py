@@ -14,7 +14,7 @@ pawn_positions = [gk_pos, def_pos, mid_pos, att_pos]
 
 player_blue = Player(
     team=0, 
-    reflexes=1, 
+    reflexes=8, 
     transition_speed=5, 
     strength=5, 
     technique=5, 
@@ -23,7 +23,7 @@ player_blue = Player(
 
 player_red = Player(
     team=1, 
-    reflexes=1, 
+    reflexes=3,
     transition_speed=5, 
     strength=5, 
     technique=5, 
@@ -98,21 +98,21 @@ while True:
     #check if players changes hand position, and move the rods TODO: put transition time
     for player in players:
         player_pawns = pawns[player.team]
-        player.moveHands(ball)
-        
-        for i, hand_position in enumerate(player.hand_positions):
-            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, hand_position)
-            player.move_rod(hand_position, displacement, player_pawns)
+        player.move_hands(ball)
+
+        for i, rod_number in enumerate(player.hand_positions):
+            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_number)
+            player.move_rod(rod_number, displacement, player_pawns)
 
     # apply friction, 0 = no friction
     ball_velocity.x = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.x
     ball_velocity.y = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.y
 
     # Check for collisions with table boundaries
-    if abs(ball.pos.x) > TABLE_LENGTH/2:
+    if abs(ball.pos.x) > TABLE_LENGTH/2 - BALL_RADIUS:
         ball_velocity.x *= -1
         most_recent_pawn = None
-    if abs(ball.pos.y) > TABLE_WIDTH/2:
+    if abs(ball.pos.y) > TABLE_WIDTH/2 - BALL_RADIUS:
         ball_velocity.y *= -1
         most_recent_pawn = None
 

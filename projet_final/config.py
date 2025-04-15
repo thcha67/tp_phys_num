@@ -45,6 +45,7 @@ else:
 # Load the configuration values
 TABLE_LENGTH = table_config["table_length"]
 TABLE_WIDTH = table_config["table_width"]
+SPRING_LENGTH = table_config["spring_length"]
 PAWN_SIZE = table_config["pawn_size"]
 SEP_DEF, SEP_MID, SEP_ATT = table_config["pawn_separation"]
 BLUE_ROD_POSITIONS = table_config["blue_rod_positions"]
