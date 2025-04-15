@@ -1,5 +1,6 @@
 from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
+from playerClass import player
 import time
 
 from config import *
@@ -11,19 +12,18 @@ att_pos = [-SEP_ATT, 0, SEP_ATT]
 
 pawn_positions = [gk_pos, def_pos, mid_pos, att_pos]
 
-score = [0, 0]  #[blue team goals, red team goals]
+players = [player(5, 5, 5, 5, 0), player(5, 5, 5, 5, 1)]
 
+score = [0, 0]  #[blue team goals, red team goals]
 
 # Set up the scene
 scene = canvas(title='Babyfoot Table', width=800, height=600)
 
 # Create the table
 table = box(pos=vector(0, 0, 0), size=vector(TABLE_LENGTH, TABLE_WIDTH, 0.1), color=color.green)
-
-
 score_position = vector(0, TABLE_WIDTH/2 + 100,10)
 score_box = box(pos=score_position, size=vector(500,100,0), color=color.gray(0.5))
-blue_label = label(pos=score_box.pos, text=f"{score[0]}    :   {score[1]}", xoffset=0, yoffset=0, space=score_box.size.x, height=25, border=4, font='sans')
+score_label = label(pos=score_box.pos, text=f"{score[0]}    :   {score[1]}", xoffset=0, yoffset=0, space=score_box.size.x, height=25, border=4, font='sans')
 
 # Create the rods
 rods = [
@@ -64,17 +64,19 @@ def move_rod(teamNumber : int, rodNumber : int, mmDisplacement : int):
     
     rod_to_move = [blue_pawns, red_pawns][teamNumber][rodNumber]
     
-    #check if movement is legal for all pawns
-    legality = []
-    if rodNumber == 0:
-        for pawn in rod_to_move:
-            if pawn.pos.y < NET_WIDTH/2 and pawn.pos.y > -NET_WIDTH/2:
-                    legality.append(True)
-    else:
-        for pawn in rod_to_move:
-            if pawn.pos.y < TABLE_WIDTH/2 and pawn.pos.y > -TABLE_WIDTH/2:
-                    legality.append(True)
+    #check if player has hand on the rod
+    if rodNumber not in players[teamNumber].handPositions:
+        return None
     
+    max_height = TABLE_WIDTH/2
+    if rodNumber == 0: #if gk
+        max_height = NET_WIDTH/2
+    
+    legality = []
+    for pawn in rod_to_move:
+        if pawn.pos.y + mmDisplacement <= max_height and pawn.pos.y + mmDisplacement >= -max_height:
+            legality.append(True)
+
     #if movement is legal, move all pawns on the rod
     if len(legality) == len(rod_to_move):
         for pawn in rod_to_move:
@@ -82,7 +84,7 @@ def move_rod(teamNumber : int, rodNumber : int, mmDisplacement : int):
 
 def update_score(teamNumber : int):
     score[teamNumber] = score[teamNumber] + 1
-    blue_label.text = f"{score[0]}    :   {score[1]}"
+    score_label.text = f"{score[0]}    :   {score[1]}"
 
 # corner angles
 maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]**2) #maximal distance between the ball and the player to be considered as a collision
@@ -91,9 +93,16 @@ corner_angles = [0.983, 1.337, np.pi-1.337, np.pi-0.983] # in radians
 most_recent_pawn = None
 recent_goal = False
 while True:
-    rate(600)
+    rate(50)
     # Move the ball
     ball.pos += ball_velocity * DT
+    
+    #check if players changes hand position, and move the rods TODO: put transition time
+    for team in range(len(players)):
+        players[team].moveHands(ball, team)
+        mmDisplacements = players[team].moveRodAmount(ball, ball_velocity, team, [blue_pawns, red_pawns])
+        for handIndex in range(len(players[team].handPositions)):
+            move_rod(team, players[team].handPositions[handIndex], mmDisplacements[handIndex])
     
     # apply friction, 0 = no friction
     ball_velocity.x = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.x
@@ -149,11 +158,9 @@ while True:
         if not recent_goal:
             if abs(ball.pos.x - net.pos.x) < (ball.radius + net.size.x / 2) and abs(ball.pos.y - net.pos.y) < (ball.radius + net.size.y / 2):
                 if net_number == 0:
-                    update_score(0)
-                    recent_goal = True
-                else:
                     update_score(1)
                     recent_goal = True
-                print("GOAL")
-                print(score)
+                else:
+                    update_score(0)
+                    recent_goal = True
         net_number += 1
