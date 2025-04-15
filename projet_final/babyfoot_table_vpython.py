@@ -12,12 +12,30 @@ att_pos = [-SEP_ATT, 0, SEP_ATT]
 
 pawn_positions = [gk_pos, def_pos, mid_pos, att_pos]
 
-players = [Player(5, 5, 5, 5, 0), Player(5, 5, 5, 5, 1)]
+player_blue = Player(
+    team=0, 
+    reflexes=1, 
+    transition_speed=5, 
+    strength=5, 
+    technique=5, 
+    strategy=0
+)
+
+player_red = Player(
+    team=1, 
+    reflexes=1, 
+    transition_speed=5, 
+    strength=5, 
+    technique=5, 
+    strategy=1
+)
+
+players = [player_blue, player_red]
 
 score = [0, 0]  #[blue team goals, red team goals]
 
 # Set up the scene
-scene = canvas(title='Babyfoot Table', width=800, height=600)
+scene = canvas(title='Babyfoot Table', width=800, height=600, userzoom=False)
 
 # Create the table
 table = box(pos=vector(0, 0, 0), size=vector(TABLE_LENGTH, TABLE_WIDTH, 0.1), color=color.green)
@@ -32,17 +50,17 @@ rods = [
 ]
 
 # Create the players
-pawns: list[box] = []
+individual_pawns: list[box] = []
 
 # blue
 for i, rod_pos in enumerate(BLUE_ROD_POSITIONS):
     for pawn_pos in pawn_positions[i]:
-        pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(PAWN_SIZE[0], PAWN_SIZE[1], 1), color=color.blue))
+        individual_pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(PAWN_SIZE[0], PAWN_SIZE[1], 1), color=color.blue))
 
 # red
 for i, rod_pos in enumerate(RED_ROD_POSITIONS):
     for pawn_pos in pawn_positions[i]:
-        pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(PAWN_SIZE[0], PAWN_SIZE[1], 1), color=color.red))
+        individual_pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(PAWN_SIZE[0], PAWN_SIZE[1], 1), color=color.red))
 
 
 # Create the ball at the specified position
@@ -54,33 +72,13 @@ net_blue = box(pos=vector(-TABLE_LENGTH/2-NET_DEPTH/2, 0, 0.15), size=vector(NET
 net_red = box(pos=vector(TABLE_LENGTH/2+NET_DEPTH/2, 0, 0.15), size=vector(NET_DEPTH, NET_WIDTH, NET_THICKNESS), color=color.white)
 
 
-blue_pawns = [[pawns[0]], [defender for defender in pawns[1:3]], [mid for mid in pawns[3:8]], [att for att in pawns[8:11]]]
-red_pawns = [[pawns[11]], [defender for defender in pawns[12:14]], [mid for mid in pawns[14:19]], [att for att in pawns[19:22]]]
+pawns = [
+    [[individual_pawns[0]], [defender for defender in individual_pawns[1:3]], [mid for mid in individual_pawns[3:8]], [att for att in individual_pawns[8:11]]],
+    [[individual_pawns[11]], [defender for defender in individual_pawns[12:14]], [mid for mid in individual_pawns[14:19]], [att for att in individual_pawns[19:22]]]
+]
 
-def move_rod(teamNumber : int, rodNumber : int, mmDisplacement : int):
-    #team Number: 0 for blue, 1 for red
-    #rod Number : 0 = gk, 1 = def, 2 = mid, 3 = att
-    #mmDisplacement is positive to go up, or negative to go down
-    
-    rod_to_move = [blue_pawns, red_pawns][teamNumber][rodNumber]
-    
-    #check if player has hand on the rod
-    if rodNumber not in players[teamNumber].handPositions:
-        return None
-    
-    max_height = TABLE_WIDTH/2
-    if rodNumber == 0: #if gk
-        max_height = NET_WIDTH/2
-    
-    legality = []
-    for pawn in rod_to_move:
-        if pawn.pos.y + mmDisplacement <= max_height and pawn.pos.y + mmDisplacement >= -max_height:
-            legality.append(True)
-
-    #if movement is legal, move all pawns on the rod
-    if len(legality) == len(rod_to_move):
-        for pawn in rod_to_move:
-            pawn.pos += vector(0, mmDisplacement, 0)
+# blue_pawns = [[individual_pawns[0]], [defender for defender in individual_pawns[1:3]], [mid for mid in individual_pawns[3:8]], [att for att in individual_pawns[8:11]]]
+# red_pawns = [[individual_pawns[11]], [defender for defender in individual_pawns[12:14]], [mid for mid in individual_pawns[14:19]], [att for att in individual_pawns[19:22]]]
 
 def update_score(teamNumber : int):
     score[teamNumber] = score[teamNumber] + 1
@@ -93,17 +91,19 @@ corner_angles = [0.983, 1.337, np.pi-1.337, np.pi-0.983] # in radians
 most_recent_pawn = None
 recent_goal = False
 while True:
-    rate(50)
+    rate(400)
     # Move the ball
     ball.pos += ball_velocity * DT
     
     #check if players changes hand position, and move the rods TODO: put transition time
-    for team in range(len(players)):
-        players[team].moveHands(ball, team)
-        mmDisplacements = players[team].moveRodAmount(ball, ball_velocity, team, [blue_pawns, red_pawns])
-        for handIndex in range(len(players[team].handPositions)):
-            move_rod(team, players[team].handPositions[handIndex], mmDisplacements[handIndex])
-    
+    for player in players:
+        player_pawns = pawns[player.team]
+        player.moveHands(ball)
+        
+        for i, hand_position in enumerate(player.hand_positions):
+            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, hand_position)
+            player.move_rod(hand_position, displacement, player_pawns)
+
     # apply friction, 0 = no friction
     ball_velocity.x = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.x
     ball_velocity.y = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.y
@@ -117,7 +117,7 @@ while True:
         most_recent_pawn = None
 
     # Check for collisions with players
-    for pawn in pawns:
+    for pawn in individual_pawns:
         pawn_to_ball_vct = pawn.pos - ball.pos
         pawn_to_ball_distance = mag(pawn_to_ball_vct)
 
