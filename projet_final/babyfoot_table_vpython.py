@@ -1,6 +1,6 @@
 from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
-from playerClass import player
+from player import Player
 import time
 
 from config import *
@@ -12,7 +12,7 @@ att_pos = [-SEP_ATT, 0, SEP_ATT]
 
 pawn_positions = [gk_pos, def_pos, mid_pos, att_pos]
 
-players = [player(5, 5, 5, 5, 0), player(5, 5, 5, 5, 1)]
+players = [Player(5, 5, 5, 5, 0), Player(5, 5, 5, 5, 1)]
 
 score = [0, 0]  #[blue team goals, red team goals]
 

@@ -2,8 +2,7 @@ from vpython import sphere, vector, box
 from config import *
 import math
 
-class player():
-    
+class Player():
     def __init__(self, reflexes, vitesseTransition, forceFrappe, technique, preferedStrategy):
         #each of the four stats are on a scale from 1-10
         self.reflexes = reflexes
