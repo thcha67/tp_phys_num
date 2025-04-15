@@ -21,7 +21,7 @@ class Player():
     def __init__(self, team, reflexes, transition_speed, strength, technique, strategy):
         #each of the four stats are on a scale from 1-10
         self.team = team #0 = blue, 1 = red
-        self.reflexes = reflexes/10 
+        self.reflexes = reflexes/10/DT 
         self.transition = transition_speed
         self.force = strength
         self.technique = technique

@@ -33,15 +33,17 @@ player_red = Player(
 players = [player_blue, player_red]
 
 score = [0, 0]  #[blue team goals, red team goals]
+simulation_time = 0
 
 # Set up the scene
 scene = canvas(title='Babyfoot Table', width=800, height=600, userzoom=False)
 
 # Create the table
 table = box(pos=vector(0, 0, 0), size=vector(TABLE_LENGTH, TABLE_WIDTH, 0.1), color=color.green)
-score_position = vector(0, TABLE_WIDTH/2 + 100,10)
-score_box = box(pos=score_position, size=vector(500,100,0), color=color.gray(0.5))
+score_box = box(pos=vector(0, TABLE_WIDTH/2 + 100,10), size=vector(250,100,0), color=color.gray(0.5))
 score_label = label(pos=score_box.pos, text=f"{score[0]}    :   {score[1]}", xoffset=0, yoffset=0, space=score_box.size.x, height=25, border=4, font='sans')
+time_box = box(pos=vector(250, TABLE_WIDTH/2 + 100,10), size=vector(200,100,0), color=color.gray(0.5))
+time_label = label(pos=time_box.pos, text=f"{simulation_time}s", xoffset=0, yoffset=0, space=score_box.size.x, height=25, border=4, font='sans')
 
 # Create the rods
 rods = [
@@ -62,7 +64,6 @@ for i, rod_pos in enumerate(RED_ROD_POSITIONS):
     for pawn_pos in pawn_positions[i]:
         individual_pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(PAWN_SIZE[0], PAWN_SIZE[1], 1), color=color.red))
 
-
 # Create the ball at the specified position
 ball = sphere(pos=vector(BALL_INITIAL_POSITION[0], BALL_INITIAL_POSITION[1], 0.15), radius=BALL_RADIUS, color=color.white)
 ball_velocity = vector(BALL_INITIAL_VELOCITY_MAGNITUDE*np.cos(BALL_INITIAL_VELOCITY_ANGLE), BALL_INITIAL_VELOCITY_MAGNITUDE*np.sin(BALL_INITIAL_VELOCITY_ANGLE), 0)
@@ -70,7 +71,6 @@ ball_velocity = vector(BALL_INITIAL_VELOCITY_MAGNITUDE*np.cos(BALL_INITIAL_VELOC
 # Create the nets behind each goalkeeper
 net_blue = box(pos=vector(-TABLE_LENGTH/2-NET_DEPTH/2, 0, 0.15), size=vector(NET_DEPTH, NET_WIDTH, NET_THICKNESS), color=color.white)
 net_red = box(pos=vector(TABLE_LENGTH/2+NET_DEPTH/2, 0, 0.15), size=vector(NET_DEPTH, NET_WIDTH, NET_THICKNESS), color=color.white)
-
 
 pawns = [
     [[individual_pawns[0]], [defender for defender in individual_pawns[1:3]], [mid for mid in individual_pawns[3:8]], [att for att in individual_pawns[8:11]]],
@@ -91,7 +91,9 @@ corner_angles = [0.983, 1.337, np.pi-1.337, np.pi-0.983] # in radians
 most_recent_pawn = None
 recent_goal = False
 while True:
-    rate(400)
+    rate(1/DT)
+    simulation_time += DT
+    time_label.text = f"{round(simulation_time, 4)}s"
     # Move the ball
     ball.pos += ball_velocity * DT
     
