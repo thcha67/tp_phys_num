@@ -18,17 +18,22 @@ class Player():
         [[0, 1], [0, 1], [0, 3]], # never midfielders ):
     ]
 
-    def __init__(self, team, reflexes, transition_speed, strength, technique, strategy):
+    def __init__(self, team):
         #each of the four stats are on a scale from 1-10
         self.team = team #0 = blue, 1 = red
-        self.reflexes = reflexes/10/DT 
-        self.transition = transition_speed
-        self.force = strength
-        self.technique = technique
-        self.strategy = strategy  # 0 = gk all time, 1 = opportunistic attack, 2 = def all time, 3 = never midfield
+        self.load_player_config()
         self.hand_positions = [0, 1]  #[rod left hand, rod right hand]
-
         self.rod_positions = self.ALL_ROD_POSITIONS[self.team] #get the rod positions for the team
+
+    def load_player_config(self):
+        with open(f"player{self.team}.json", "r") as f:
+            player_config = json.load(f)
+
+        self.reflexes = player_config["reflexes"]/10/DT # 0 to 10
+        self.transition = player_config["transition_speed"] # 0 to 10
+        self.strength = player_config["strength"] # 0 to 10
+        self.technique = player_config["technique"] # 0 to 10
+        self.strategy = player_config["strategy"] # 0 = gk all time, 1 = opportunistic attack, 2 = def all time, 3 = never midfield
 
     
     def move_hands(self, ball : sphere):
