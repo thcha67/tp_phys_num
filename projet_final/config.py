@@ -17,6 +17,7 @@ DEFAULT_TABLE_CONFIG = {
 
 DEFAULT_SIMULATION_CONFIG = {
     "dt": 0.02,
+    "time_multiplier": 1,
     "ball_initial_position": [500, 0],
     "ball_initial_velocity_magnitude": 100,
     "ball_initial_velocity_angle": 0.1,
@@ -28,6 +29,9 @@ DEFAULT_SIMULATION_CONFIG = {
 if os.path.exists("table_config.json"):
     with open("table_config.json", "r") as f:
         table_config = json.load(f)
+        for key in DEFAULT_TABLE_CONFIG:
+            if key not in table_config:
+                table_config[key] = DEFAULT_TABLE_CONFIG[key]
 else:
     with open("table_config.json", "w") as f:
         json.dump(DEFAULT_TABLE_CONFIG, f, indent=4)
@@ -36,6 +40,9 @@ else:
 if os.path.exists("simulation_config.json"):
     with open("simulation_config.json", "r") as f:
         simulation_config = json.load(f)
+        for key in DEFAULT_SIMULATION_CONFIG:
+            if key not in simulation_config:
+                simulation_config[key] = DEFAULT_SIMULATION_CONFIG[key]
 else:
     with open("simulation_config.json", "w") as f:
         json.dump(DEFAULT_SIMULATION_CONFIG, f, indent=4)
@@ -57,6 +64,7 @@ NET_DEPTH = table_config["net_depth"]
 BALL_RADIUS = table_config["ball_radius"]
 
 DT = simulation_config["dt"]
+TIME_MULTIPLIER = simulation_config["time_multiplier"]
 BALL_INITIAL_POSITION = simulation_config["ball_initial_position"]
 BALL_INITIAL_VELOCITY_MAGNITUDE = simulation_config["ball_initial_velocity_magnitude"]
 BALL_INITIAL_VELOCITY_ANGLE = simulation_config["ball_initial_velocity_angle"]

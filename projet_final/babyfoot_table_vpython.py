@@ -40,12 +40,33 @@ def update_score(teamNumber : int):
 
 # corner angles
 maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]**2) #maximal distance between the ball and the player to be considered as a collision
-corner_angles = [0.983, 1.337, np.pi-1.337, np.pi-0.983] # in radians
+
+tr_corner_angles = [0.983, 1.337]
+tl_corner_angles = [np.pi-1.337, np.pi-0.983]
+br_corner_angles = [-0.983, -1.337]
+bl_corner_angles = [1.337-np.pi, 0.983-np.pi]
+
+# create an arrow at all corner angles to visualize the collision angles
+import time
+
+def show_corners(pos, vec):
+    return
+    arrows = [
+        arrow(pos=pos, axis=vector(60*np.cos(angle), 60*np.sin(angle), 0), color=color.red, shaftwidth=2)
+        for angle in np.array([tr_corner_angles, tl_corner_angles, br_corner_angles, bl_corner_angles]).flatten()
+    ]
+    incoming = arrow(pos=pos, axis=vec, color=color.blue, shaftwidth=2)
+    time.sleep(3)
+    for i, a in enumerate(arrows):
+        a.visible = False
+    incoming.visible = False
+    
+
 
 most_recent_pawn = None
 recent_goal = False
 while True:
-    rate(1/DT)
+    rate(TIME_MULTIPLIER/DT) # control the simulation speed
     simulation_time += DT
     time_label.text = f"{round(simulation_time, 4)}s"
     # Move the ball
@@ -68,47 +89,69 @@ while True:
     if abs(ball.pos.x) > TABLE_LENGTH/2 - BALL_RADIUS:
         ball_velocity.x *= -1
         most_recent_pawn = None
+
     if abs(ball.pos.y) > TABLE_WIDTH/2 - BALL_RADIUS:
         ball_velocity.y *= -1
         most_recent_pawn = None
 
     # Check for collisions with players
     for pawn in individual_pawns:
-        pawn_to_ball_vct = pawn.pos - ball.pos
-        pawn_to_ball_distance = mag(pawn_to_ball_vct)
+        pawn_to_ball = ball.pos - pawn.pos
 
         # check if the ball is close enough that it could touch in the right angle and if the pawn is not the most recent pawn to touch the ball
-        if pawn_to_ball_distance < maximal_dist_of_collision and most_recent_pawn != pawn: 
-            # check what part of the pawn is touching the ball (the corners or the sides)
-            if abs(ball.pos.x - pawn.pos.x) < (ball.radius + pawn.size.x / 2) and abs(ball.pos.y - pawn.pos.y) < (ball.radius + pawn.size.y / 2):
-                recent_goal = False
+        if mag(pawn_to_ball) <= maximal_dist_of_collision and most_recent_pawn != pawn: 
+            center_to_center_angle = np.arctan2(pawn_to_ball.y, pawn_to_ball.x)
 
-                x_pos, y_pos = -pawn_to_ball_vct.x, -pawn_to_ball_vct.y
-                center_to_center_angle = np.arctan2(y_pos, x_pos)
-                
-                if ((corner_angles[0] < abs(center_to_center_angle) < corner_angles[1]) or
-                    (corner_angles[2] < abs(center_to_center_angle) < corner_angles[3])):
+            incoming_ball_velocity = mag(ball_velocity)
+            incoming_ball_angle = np.arctan2(ball_velocity.y, ball_velocity.x)
 
-                    incoming_velocity = mag(ball_velocity)
-                    incoming_angle = np.arctan2(ball_velocity.y, ball_velocity.x)
+            if tr_corner_angles[0] < center_to_center_angle < tr_corner_angles[1]: # ball on top right
+                corner_angles = tr_corner_angles
+                center_of_circular_corner = pawn.pos + vector(2.5, 7.5, 0)
+                print("top right")
+                #time.sleep(1)
 
-                    # calculate the angle between the center of the circlar corners of the pawn and the center of the ball
-                    center_of_circular_corner = pawn.pos + vector(2.5, 8.5, 0)
-                    normal_angle = np.arctan2(ball.pos.y - center_of_circular_corner.y, ball.pos.x - center_of_circular_corner.x)
+            elif tl_corner_angles[0] < center_to_center_angle < tl_corner_angles[1]: # ball on top left
+                corner_angles = tl_corner_angles
+                center_of_circular_corner = pawn.pos + vector(-2.5, 7.5, 0)
+                print("top left")
+                #time.sleep(1)
 
-                    outcoming_angle = 2*normal_angle - incoming_angle - np.pi
+            elif br_corner_angles[0] < center_to_center_angle < br_corner_angles[1]: # ball on bottom right
+                corner_angles = br_corner_angles
+                center_of_circular_corner = pawn.pos + vector(2.5, -7.5, 0)
+                print("bottom right")
+                #time.sleep(1)
 
-                    ball_velocity.x = incoming_velocity*np.cos(outcoming_angle)
-                    ball_velocity.y = incoming_velocity*np.sin(outcoming_angle)
+            elif bl_corner_angles[0] < center_to_center_angle < bl_corner_angles[1]: # ball on bottom left
+                corner_angles = bl_corner_angles
+                center_of_circular_corner = pawn.pos + vector(-2.5, -7.5, 0)
+                print("bottom left")
+                #time.sleep(1)
 
+            else:
+                if abs(pawn_to_ball.x) > 5.5: # the ball is reflected on the vertical sides
+                    if abs(pawn_to_ball.y) < 10.5:
+                        show_corners(pawn.pos, pawn_to_ball)
+                        ball_velocity.x *= -1
+                        most_recent_pawn = pawn
 
-                elif corner_angles[1] < abs(center_to_center_angle) < corner_angles[2]:
-                    ball_velocity.y *= -1
-                else:
-                    ball_velocity.x *= -1
+                elif abs(pawn_to_ball.y) > 10.5: # the ball is reflected on the horizontal sides
+                    if abs(pawn_to_ball.x) < 5.5:
+                        ball_velocity.y *= -1
+                        most_recent_pawn = pawn
+                break
+
+            if mag(center_of_circular_corner - ball.pos) < ball.radius + 3:
+                # ball reflects on corner
+                normal_angle = np.arctan2(ball.pos.y - center_of_circular_corner.y, ball.pos.x - center_of_circular_corner.x)
+                outcoming_angle = 2*normal_angle - incoming_ball_angle - np.pi
+                ball_velocity.x = incoming_ball_velocity*np.cos(outcoming_angle)
+                ball_velocity.y = incoming_ball_velocity*np.sin(outcoming_angle)
                 most_recent_pawn = pawn
             break
-    
+
+
     net_number = 0
     for net in [net_blue, net_red]:
         if not recent_goal:

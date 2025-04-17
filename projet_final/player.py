@@ -37,7 +37,7 @@ class Player():
         with open(f"player{self.team}.json", "r") as f:
             player_config = json.load(f)
 
-        self.reflexes = player_config["reflexes"]/10/DT # 0 to 10
+        self.reflexes = player_config["reflexes"]/100/DT # 0 to 10
         self.transition = player_config["transition_speed"] # 0 to 10
         self.strength = player_config["strength"] # 0 to 10
         self.technique = player_config["technique"] # 0 to 10
