@@ -18,6 +18,14 @@ class Player():
         [[0, 1], [0, 1], [0, 3]], # never midfielders ):
     ]
 
+    eff_tab_width = TABLE_WIDTH-2*SPRING_LENGTH
+    width_range = eff_tab_width/2
+    pawn_y_ranges = [
+        [[-NET_WIDTH/2, NET_WIDTH/2]],
+        [[-width_range, -width_range+eff_tab_width/2], [-width_range+eff_tab_width/2, width_range]],
+        [[-width_range, -width_range+eff_tab_width/5], [-width_range+eff_tab_width/5, -width_range+2*eff_tab_width/5], [-width_range+2*eff_tab_width/5, -width_range+3*eff_tab_width/5], [-width_range+3*eff_tab_width/5, -width_range+4*eff_tab_width/5], [-width_range+4*eff_tab_width/5, width_range]],
+        [[-width_range, -width_range+eff_tab_width/3], [-width_range+eff_tab_width/3, -width_range+2*eff_tab_width/3], [-width_range+2*eff_tab_width/3, width_range]]]
+
     def __init__(self, team):
         #each of the four stats are on a scale from 1-10
         self.team = team #0 = blue, 1 = red
@@ -60,7 +68,18 @@ class Player():
         return hand_pos_has_changed
     
     def calculate_rod_displacement(self, ball : sphere, ball_velocity : vector, pawns: list[list[box]], rod_number: int):
+        
         rod_pos_x = self.rod_positions[rod_number]
+        
+        rod_pawns = pawns[rod_number]
+        
+        if rod_number == 0:
+            delta_y = ball.pos.y - rod_pawns[0].pos.y
+            gk_displacement = max(-self.reflexes, min(self.reflexes, delta_y))
+            if self.is_gk_displacement_allowed(rod_pawns, gk_displacement):
+                return gk_displacement
+            else:
+                return 0
 
         if (self.team == 0 and ball_velocity.x > 0) or (self.team == 1 and ball_velocity.x < 0):
             return 0 # ball goes towards opposing net
@@ -68,37 +87,37 @@ class Player():
         elif (self.team == 0 and ball.pos.x < rod_pos_x) or (self.team == 1 and ball.pos.x > rod_pos_x):
             return 0 # la balle est derrière le joueur, donc bouge pas le pawn
         
-        rod_pawns = pawns[rod_number]
-        delta_x = ball.pos.x - rod_pos_x
+        delta_x = rod_pos_x - ball.pos.x
         predicted_hit_y = delta_x * ball_velocity.y/ball_velocity.x + ball.pos.y
+
 
         # bind predicted_hit_y to the table limits
         predicted_hit_y = max(-TABLE_WIDTH/2 + SPRING_LENGTH, min(TABLE_WIDTH/2 - SPRING_LENGTH, predicted_hit_y))
 
-        pawn_positions = np.array([pawn.pos.y for pawn in rod_pawns])
-        distances_to_predicted_hit = abs(pawn_positions - predicted_hit_y)
-        sorted_idxes = np.argsort(distances_to_predicted_hit)
+        if predicted_hit_y >= self.width_range:
+            index_of_pawn = len(rod_pawns) - 1
+        elif predicted_hit_y <= -self.width_range:
+            index_of_pawn = 0
+        else:
+            for i, region in enumerate(self.pawn_y_ranges[rod_number]):
+                if region[0] <= predicted_hit_y <= region[1]:
+                    index_of_pawn = i
+                    break
+        
+        try:
+            pawn = rod_pawns[index_of_pawn]
+        except:
+            print(self.pawn_y_ranges)
+            print(predicted_hit_y)
+            print(rod_number)
+            exit()
+        delta_y = predicted_hit_y - pawn.pos.y
+        displacement = max(-self.reflexes, min(self.reflexes, delta_y))
 
-        for i in range(len(sorted_idxes)):
-            # if i == 4:
-            #     time.sleep(5)
-            #     print(predicted_hit_y, pawn_positions, distances_to_predicted_hit, sorted_idxes)
-            pawn = rod_pawns[sorted_idxes[i]]
-            delta_y = predicted_hit_y - pawn.pos.y
-            displacement = max(-self.reflexes, min(self.reflexes, delta_y))
-            
-            if rod_number == 0:
-                if not self.is_gk_displacement_allowed(rod_pawns, displacement):
-                    if displacement < 0:
-                        return -NET_WIDTH / 2 - rod_pawns[0].pos.y
-                    else:
-                        return NET_WIDTH / 2 - rod_pawns[0].pos.y
-                break
-
-            elif self.is_displacement_allowed(rod_pawns, displacement):
-                break
-
-        return displacement
+        if self.is_displacement_allowed(rod_pawns, displacement):
+            return displacement
+        else:
+            return 0
     
     def is_displacement_allowed(self, rod_pawns, displacement):
         max_position = TABLE_WIDTH / 2 - SPRING_LENGTH
