@@ -78,7 +78,7 @@ while True:
         player.move_hands(ball)
 
         for i, rod_number in enumerate(player.hand_positions):
-            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_number)
+            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_number, i)
             player.move_rod(rod_number, displacement, player_pawns)
 
     # apply friction, 0 = no friction
