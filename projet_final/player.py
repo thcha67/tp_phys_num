@@ -38,11 +38,11 @@ class Player():
             player_config = json.load(f)
 
         self.reflexes = player_config["reflexes"]/10/DT # 0 to 10
-        self.transition = player_config["transition_speed"] # 0 to 10
+        self.transition_time = player_config["transition_speed"] # 0 to 10
         self.strength = player_config["strength"] # 0 to 10
         self.technique = player_config["technique"] # 0 to 10
         self.strategy = player_config["strategy"] # 0 = gk all time, 1 = opportunistic attack, 2 = def all time, 3 = never midfield
-
+        self.transition_cooldown = [0, 0] #[cooldown iterations left for hand 1, for hand 2]
     
     def move_hands(self, ball : sphere):
         ball_section = 0 # intially set to defense
@@ -62,18 +62,26 @@ class Player():
         new_hand_positions = self.strategy_to_hand_positions[self.strategy][ball_section]
 
         hand_pos_has_changed = new_hand_positions != self.hand_positions
-
+        if hand_pos_has_changed:
+            for i in range(2):
+                if self.hand_positions[i] != new_hand_positions[i]:
+                    self.transition_cooldown[i] = self.transition_time
+            
         self.hand_positions = new_hand_positions
 
         return hand_pos_has_changed
     
-    def calculate_rod_displacement(self, ball : sphere, ball_velocity : vector, pawns: list[list[box]], rod_number: int):
+    def calculate_rod_displacement(self, ball : sphere, ball_velocity : vector, pawns: list[list[box]], rod_number: int, hand_number : int):
+        
+        if self.transition_cooldown[hand_number] > 0:
+            self.transition_cooldown[hand_number] -= 1
+            return 0
         
         rod_pos_x = self.rod_positions[rod_number]
         
         rod_pawns = pawns[rod_number]
         
-        if rod_number == 0:
+        if rod_number == 0:  #TODO : PROBLÈME QUE LE GARDIEN BOUGE TOUJOURS QUAND BALLE EN SECTION 2 MÊME AVEC STRATÉGIE ALL OPPORTUNISTIC
             delta_y = ball.pos.y - rod_pawns[0].pos.y
             gk_displacement = max(-self.reflexes, min(self.reflexes, delta_y))
             if self.is_gk_displacement_allowed(rod_pawns, gk_displacement):
