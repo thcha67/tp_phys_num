@@ -5,6 +5,7 @@ DEFAULT_TABLE_CONFIG = {
     "table_length": 1140,
     "table_width": 700,
     "pawn_size": [11, 21, 1],
+    "pawn_corner_radius": 3,
     "pawn_separation": [335, 122, 215],
     "blue_rod_positions": [-525, -375, -72, 228],
     "red_rod_positions": [525, 375, 72, -228],
@@ -54,6 +55,7 @@ TABLE_LENGTH = table_config["table_length"]
 TABLE_WIDTH = table_config["table_width"]
 SPRING_LENGTH = table_config["spring_length"]
 PAWN_SIZE = table_config["pawn_size"]
+PAWN_CORNER_RADIUS = table_config["pawn_corner_radius"]
 SEP_DEF, SEP_MID, SEP_ATT = table_config["pawn_separation"]
 BLUE_ROD_POSITIONS = table_config["blue_rod_positions"]
 RED_ROD_POSITIONS = table_config["red_rod_positions"]

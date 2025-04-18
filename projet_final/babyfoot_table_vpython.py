@@ -5,6 +5,7 @@ from utils import generate_rods, generate_pawns
 
 from config import *
 
+import time
 
 players = [Player(0), Player(1)]
 
@@ -77,17 +78,46 @@ while True:
     for pawn in individual_pawns:
         pawn_to_ball = ball.pos - pawn.pos
 
-        # check if the ball is close enough that it could touch in the right angle and if the pawn is not the most recent pawn to touch the ball
         if mag(pawn_to_ball) <= maximal_dist_of_collision and most_recent_pawn != pawn:
-            if abs(pawn_to_ball.x) > 5.5 and abs(pawn_to_ball.y) < 10.5: # the ball is reflected on the vertical sides
+            dx = abs(pawn_to_ball.x)
+            dy = abs(pawn_to_ball.y)
+
+            inner_half_w = PAWN_SIZE[0] / 2 - PAWN_CORNER_RADIUS
+            inner_half_h = PAWN_SIZE[1] / 2 - PAWN_CORNER_RADIUS
+            outer_half_w = inner_half_w + PAWN_CORNER_RADIUS
+            outer_half_h = inner_half_h + PAWN_CORNER_RADIUS
+
+            # Check side collisions
+            collided = False
+            if dx <= inner_half_w and dy <= outer_half_h:
                 ball_velocity.x *= -1
                 most_recent_pawn = pawn
                 break
-
-            elif abs(pawn_to_ball.y) > 10.5 and abs(pawn_to_ball.x) < 5.5: # the ball is reflected on the horizontal sides
+            elif dy <= inner_half_h and dx <= outer_half_w:
                 ball_velocity.y *= -1
                 most_recent_pawn = pawn
                 break
+
+            # Check corner collisions
+            corner_centers = [
+                vector(pawn.pos.x - inner_half_w, pawn.pos.y - inner_half_h, 0.15),  # bottom left
+                vector(pawn.pos.x + inner_half_w, pawn.pos.y - inner_half_h, 0.15),  # bottom right
+                vector(pawn.pos.x - inner_half_w, pawn.pos.y + inner_half_h, 0.15),  # top left
+                vector(pawn.pos.x + inner_half_w, pawn.pos.y + inner_half_h, 0.15),  # top right
+            ]
+
+            for corner in corner_centers:
+                diff = ball.pos - corner
+                dist_squared = diff.x**2 + diff.y**2
+                collision_radius = ball.radius + PAWN_CORNER_RADIUS
+
+                if dist_squared <= collision_radius**2:
+                    normal = diff.norm()  # unit vector from corner to ball center
+                    dot = ball_velocity.x * normal.x + ball_velocity.y * normal.y
+                    ball_velocity.x -= 2 * dot * normal.x
+                    ball_velocity.y -= 2 * dot * normal.y
+                    most_recent_pawn = pawn
+                    break
 
     net_number = 0
     for net in [net_blue, net_red]:

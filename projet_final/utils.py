@@ -38,8 +38,3 @@ def generate_pawns():
         [[individual_pawns[11]], [defender for defender in individual_pawns[12:14]], [mid for mid in individual_pawns[14:19]], [att for att in individual_pawns[19:22]]]
     ], individual_pawns
 
-
-tr_corner_angles = [0.983, 1.337]
-tl_corner_angles = [np.pi-1.337, np.pi-0.983]
-br_corner_angles = [-0.983, -1.337]
-bl_corner_angles = [1.337-np.pi, 0.983-np.pi]
