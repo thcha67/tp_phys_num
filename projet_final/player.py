@@ -39,6 +39,8 @@ class Player():
 
         self.reflexes = player_config["reflexes"]/100/DT # 0 to 10
         self.transition = player_config["transition_speed"] # 0 to 10
+        self.reflexes = player_config["reflexes"]/10/DT # 0 to 10
+        self.transition_time = player_config["transition_speed"] # 0 to 10
         self.strength = player_config["strength"] # 0 to 10
         self.technique = player_config["technique"] # 0 to 10
         self.strategy = player_config["strategy"] # 0 = gk all time, 1 = opportunistic attack, 2 = def all time, 3 = never midfield

@@ -99,57 +99,71 @@ while True:
         pawn_to_ball = ball.pos - pawn.pos
 
         # check if the ball is close enough that it could touch in the right angle and if the pawn is not the most recent pawn to touch the ball
-        if mag(pawn_to_ball) <= maximal_dist_of_collision and most_recent_pawn != pawn: 
-            center_to_center_angle = np.arctan2(pawn_to_ball.y, pawn_to_ball.x)
+        if mag(pawn_to_ball) <= maximal_dist_of_collision and most_recent_pawn != pawn:
 
-            incoming_ball_velocity = mag(ball_velocity)
-            incoming_ball_angle = np.arctan2(ball_velocity.y, ball_velocity.x)
+            if abs(pawn_to_ball.x) > 5.5: # the ball is reflected on the vertical sides
+                if abs(pawn_to_ball.y) < 10.5:
+                    show_corners(pawn.pos, pawn_to_ball)
+                    ball_velocity.x *= -1
+                    most_recent_pawn = pawn
+                    break
 
-            if tr_corner_angles[0] < center_to_center_angle < tr_corner_angles[1]: # ball on top right
-                corner_angles = tr_corner_angles
-                center_of_circular_corner = pawn.pos + vector(2.5, 7.5, 0)
-                print("top right")
-                #time.sleep(1)
+            elif abs(pawn_to_ball.y) > 10.5: # the ball is reflected on the horizontal sides
+                if abs(pawn_to_ball.x) < 5.5:
+                    ball_velocity.y *= -1
+                    most_recent_pawn = pawn
+                    break
 
-            elif tl_corner_angles[0] < center_to_center_angle < tl_corner_angles[1]: # ball on top left
-                corner_angles = tl_corner_angles
-                center_of_circular_corner = pawn.pos + vector(-2.5, 7.5, 0)
-                print("top left")
-                #time.sleep(1)
+            # center_to_center_angle = np.arctan2(pawn_to_ball.y, pawn_to_ball.x)
 
-            elif br_corner_angles[0] < center_to_center_angle < br_corner_angles[1]: # ball on bottom right
-                corner_angles = br_corner_angles
-                center_of_circular_corner = pawn.pos + vector(2.5, -7.5, 0)
-                print("bottom right")
-                #time.sleep(1)
+            # incoming_ball_velocity = mag(ball_velocity)
+            # incoming_ball_angle = np.arctan2(ball_velocity.y, ball_velocity.x)
 
-            elif bl_corner_angles[0] < center_to_center_angle < bl_corner_angles[1]: # ball on bottom left
-                corner_angles = bl_corner_angles
-                center_of_circular_corner = pawn.pos + vector(-2.5, -7.5, 0)
-                print("bottom left")
-                #time.sleep(1)
+            # if tr_corner_angles[0] < center_to_center_angle < tr_corner_angles[1]: # ball on top right
+            #     corner_angles = tr_corner_angles
+            #     center_of_circular_corner = pawn.pos + vector(2.5, 7.5, 0)
+            #     print("top right")
+            #     #time.sleep(1)
 
-            else:
-                if abs(pawn_to_ball.x) > 5.5: # the ball is reflected on the vertical sides
-                    if abs(pawn_to_ball.y) < 10.5:
-                        show_corners(pawn.pos, pawn_to_ball)
-                        ball_velocity.x *= -1
-                        most_recent_pawn = pawn
+            # elif tl_corner_angles[0] < center_to_center_angle < tl_corner_angles[1]: # ball on top left
+            #     corner_angles = tl_corner_angles
+            #     center_of_circular_corner = pawn.pos + vector(-2.5, 7.5, 0)
+            #     print("top left")
+            #     #time.sleep(1)
 
-                elif abs(pawn_to_ball.y) > 10.5: # the ball is reflected on the horizontal sides
-                    if abs(pawn_to_ball.x) < 5.5:
-                        ball_velocity.y *= -1
-                        most_recent_pawn = pawn
-                break
+            # elif br_corner_angles[0] < center_to_center_angle < br_corner_angles[1]: # ball on bottom right
+            #     corner_angles = br_corner_angles
+            #     center_of_circular_corner = pawn.pos + vector(2.5, -7.5, 0)
+            #     print("bottom right")
+            #     #time.sleep(1)
 
-            if mag(center_of_circular_corner - ball.pos) < ball.radius + 3:
-                # ball reflects on corner
-                normal_angle = np.arctan2(ball.pos.y - center_of_circular_corner.y, ball.pos.x - center_of_circular_corner.x)
-                outcoming_angle = 2*normal_angle - incoming_ball_angle - np.pi
-                ball_velocity.x = incoming_ball_velocity*np.cos(outcoming_angle)
-                ball_velocity.y = incoming_ball_velocity*np.sin(outcoming_angle)
-                most_recent_pawn = pawn
-            break
+            # elif bl_corner_angles[0] < center_to_center_angle < bl_corner_angles[1]: # ball on bottom left
+            #     corner_angles = bl_corner_angles
+            #     center_of_circular_corner = pawn.pos + vector(-2.5, -7.5, 0)
+            #     print("bottom left")
+            #     #time.sleep(1)
+
+            # else:
+            #     if abs(pawn_to_ball.x) > 5.5: # the ball is reflected on the vertical sides
+            #         if abs(pawn_to_ball.y) < 10.5:
+            #             show_corners(pawn.pos, pawn_to_ball)
+            #             ball_velocity.x *= -1
+            #             most_recent_pawn = pawn
+
+            #     elif abs(pawn_to_ball.y) > 10.5: # the ball is reflected on the horizontal sides
+            #         if abs(pawn_to_ball.x) < 5.5:
+            #             ball_velocity.y *= -1
+            #             most_recent_pawn = pawn
+            #     break
+
+            # if mag(center_of_circular_corner - ball.pos) < ball.radius + 3:
+            #     # ball reflects on corner
+            #     normal_angle = np.arctan2(ball.pos.y - center_of_circular_corner.y, ball.pos.x - center_of_circular_corner.x)
+            #     outcoming_angle = 2*normal_angle - incoming_ball_angle - np.pi
+            #     ball_velocity.x = incoming_ball_velocity*np.cos(outcoming_angle)
+            #     ball_velocity.y = incoming_ball_velocity*np.sin(outcoming_angle)
+            #     most_recent_pawn = pawn
+            # break
 
 
     net_number = 0
