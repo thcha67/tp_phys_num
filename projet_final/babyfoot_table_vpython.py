@@ -53,29 +53,6 @@ while True:
     time_label.text = f"{round(simulation_time, 4)}s"
     # Move the ball
     ball.pos += ball_velocity * DT
-    
-    #check if players changes hand position, and move the rods
-    for player in players:
-        player_pawns = pawns[player.team]
-        player.move_hands(ball)
-
-        #calculate the displacement of each rod
-        for i, rod_number in enumerate(player.hand_positions):
-            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_number, i)
-            player.move_rod(rod_number, displacement, player_pawns)
-
-        #change the color of the hand identifiers
-        team_color = color.blue
-        if player.team == 1:
-            team_color = color.red
-        hand_idx = 0
-        for i, hand_iden in enumerate(hand_identifiers[player.team*4 : (player.team+1) * 4]):
-            if i in player.hand_positions:
-                if player.transition_cooldown[hand_idx] == 0:
-                    hand_iden.color= team_color
-                hand_idx += 1
-            else:
-                hand_iden.color = color.gray(0.5)
 
     # apply friction, 0 = no friction
     ball_velocity.x = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.x
@@ -94,48 +71,72 @@ while True:
     if abs(ball.pos.y) >= TABLE_WIDTH/2 - BALL_RADIUS:
         ball_velocity.y *= -1
         most_recent_pawn = None
+    
+    #check if players changes hand position, and move the rods. Also check for collisions with the pawns
+    for player in players:
+        player_pawns = pawns[player.team]
+        player.move_hands(ball)
 
-    # Check for collisions with players
-    for pawn in individual_pawns:
-        pawn_to_ball = ball.pos - pawn.pos
+        #calculate the displacement of each rod
+        for i, rod_index in enumerate(player.hand_positions):
+            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_index, i)
+            player.move_rod(rod_index, displacement, player_pawns)
 
-        if mag(pawn_to_ball) <= maximal_dist_of_collision and most_recent_pawn != pawn:
-            dx = abs(pawn_to_ball.x)
-            dy = abs(pawn_to_ball.y)
+        #change the color of the hand identifiers
+        hand_idx = 0
+        for i, hand_iden in enumerate(hand_identifiers[player.team*4 : (player.team+1) * 4]):
+            if i in player.hand_positions:
+                if player.transition_cooldown[hand_idx] == 0:
+                    hand_iden.color = player.color
+                hand_idx += 1
+            else:
+                hand_iden.color = color.gray(0.5)
 
-            inner_half_w = PAWN_SIZE[0] / 2 - PAWN_CORNER_RADIUS
-            inner_half_h = PAWN_SIZE[1] / 2 - PAWN_CORNER_RADIUS
-            outer_half_w = inner_half_w + PAWN_CORNER_RADIUS
-            outer_half_h = inner_half_h + PAWN_CORNER_RADIUS
+        closest_rod_to_ball = np.argmin(abs(player.rod_positions - ball.pos.x))
 
-            # Check side collisions
-            if dx <= inner_half_w and dy <= outer_half_h:
-                ball_velocity.x *= -1
-                most_recent_pawn = pawn
-                break
-            elif dy <= inner_half_h and dx <= outer_half_w:
-                ball_velocity.y *= -1
-                most_recent_pawn = pawn
-                break
+        new_velocity_magnitude = player.get_velocity()
 
-            # Check corner collisions
-            corner_centers = [
-                vector(pawn.pos.x - inner_half_w, pawn.pos.y - inner_half_h, 0.15),  # bottom left
-                vector(pawn.pos.x + inner_half_w, pawn.pos.y - inner_half_h, 0.15),  # bottom right
-                vector(pawn.pos.x - inner_half_w, pawn.pos.y + inner_half_h, 0.15),  # top left
-                vector(pawn.pos.x + inner_half_w, pawn.pos.y + inner_half_h, 0.15),  # top right
-            ]
+        for pawn in player_pawns[closest_rod_to_ball]: # check for collisions with the closest rod to the ball
+            pawn_to_ball = ball.pos - pawn.pos
 
-            for corner in corner_centers:
-                diff = ball.pos - corner
-                dist_squared = diff.x**2 + diff.y**2
-                collision_radius = ball.radius + PAWN_CORNER_RADIUS
+            if mag(pawn_to_ball) <= maximal_dist_of_collision and most_recent_pawn != pawn: # possible collision
 
-                if dist_squared <= collision_radius**2:
-                    normal = diff.norm()  # unit vector from corner to ball center
-                    dot = ball_velocity.x * normal.x + ball_velocity.y * normal.y
-                    ball_velocity.x -= 2 * dot * normal.x
-                    ball_velocity.y -= 2 * dot * normal.y
+                dx = abs(pawn_to_ball.x)
+                dy = abs(pawn_to_ball.y)
+
+                inner_half_w = PAWN_SIZE[0] / 2 - PAWN_CORNER_RADIUS
+                inner_half_h = PAWN_SIZE[1] / 2 - PAWN_CORNER_RADIUS
+                outer_half_w = inner_half_w + PAWN_CORNER_RADIUS
+                outer_half_h = inner_half_h + PAWN_CORNER_RADIUS
+
+                # Check corner collisions
+                corner_centers = [
+                    vector(pawn.pos.x - inner_half_w, pawn.pos.y - inner_half_h, 0.15),  # bottom left
+                    vector(pawn.pos.x + inner_half_w, pawn.pos.y - inner_half_h, 0.15),  # bottom right
+                    vector(pawn.pos.x - inner_half_w, pawn.pos.y + inner_half_h, 0.15),  # top left
+                    vector(pawn.pos.x + inner_half_w, pawn.pos.y + inner_half_h, 0.15),  # top right
+                ]
+
+                for corner in corner_centers:
+                    diff = ball.pos - corner
+                    dist_squared = diff.x**2 + diff.y**2
+                    collision_radius = ball.radius + PAWN_CORNER_RADIUS
+
+                    if dist_squared <= collision_radius**2:
+                        normal = diff.norm()  # unit vector from corner to ball center
+                        dot = ball_velocity.x * normal.x + ball_velocity.y * normal.y
+                        ball_velocity.x -= 2 * dot * normal.x
+                        ball_velocity.y -= 2 * dot * normal.y
+                        most_recent_pawn = pawn
+                        break
+
+                # Check side collisions
+                if dx <= inner_half_w and dy <= outer_half_h:
+                    ball_velocity.x *= -1
+                    most_recent_pawn = pawn
+                    break
+                elif dy <= inner_half_h and dx <= outer_half_w:
+                    ball_velocity.y *= -1
                     most_recent_pawn = pawn
                     break
     

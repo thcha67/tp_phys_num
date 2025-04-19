@@ -1,4 +1,4 @@
-from vpython import sphere, vector, box
+from vpython import sphere, vector, box, color
 from config import *
 import time
 import numpy as np
@@ -29,9 +29,10 @@ class Player():
     def __init__(self, team):
         #each of the four stats are on a scale from 1-10
         self.team = team #0 = blue, 1 = red
+        self.color = color.blue if team == 0 else color.red
         self.load_player_config()
         self.hand_positions = [0, 1]  #[rod left hand, rod right hand]
-        self.rod_positions = self.ALL_ROD_POSITIONS[self.team] #get the rod positions for the team
+        self.rod_positions = np.array(self.ALL_ROD_POSITIONS[self.team]) #get the rod positions for the team
 
     def load_player_config(self):
         with open(f"player{self.team}.json", "r") as f:
@@ -149,4 +150,10 @@ class Player():
         
         for pawn in rod_to_move:
             pawn.pos.y += displacement
+
+    def get_velocity(self):
+        return np.random.lognormal(np.log(self.strength + 5), 2/(self.strength + 5), 10000) - 5
+
+    
+
 
