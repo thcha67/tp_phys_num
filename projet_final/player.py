@@ -154,6 +154,8 @@ class Player():
     def get_velocity(self):
         return np.random.lognormal(np.log(self.strength + 5), 2/(self.strength + 5), 10000) - 5
 
-    
+    def is_ball_controlled(self, ball_velocity_magnitude):
+        return 1 - np.exp(-ball_velocity_magnitude / (self.technique * 10))
+
 
 

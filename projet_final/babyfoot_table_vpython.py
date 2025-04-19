@@ -46,8 +46,12 @@ def update_score(teamNumber : int):
 maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]**2) #maximal distance between the ball and the player to be considered as a collision
 
 
+a = []
+
 most_recent_pawn = None
-while True:
+# while True:
+for _ in range(1000):
+    print(_)
     rate(TIME_MULTIPLIER/DT) # control the simulation speed
     simulation_time += DT
     time_label.text = f"{round(simulation_time, 4)}s"
@@ -93,7 +97,12 @@ while True:
         closest_rod_to_ball = np.argmin(abs(player.rod_positions - ball.pos.x))
 
         new_velocity_magnitude = player.get_velocity()
-
+        is_ball_controlled = player.is_ball_controlled(mag(ball_velocity))
+        if is_ball_controlled:
+            a.append(1)
+        else:
+            a.append(0)
+        
         for pawn in player_pawns[closest_rod_to_ball]: # check for collisions with the closest rod to the ball
             pawn_to_ball = ball.pos - pawn.pos
 
@@ -152,3 +161,6 @@ while True:
                 faceoff(ball, ball_velocity)
                 time.sleep(0.5)
         net_number += 1
+
+
+print(np.mean(a))
