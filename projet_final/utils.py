@@ -1,6 +1,7 @@
 from config import *
-from vpython import box, vector, color, label, sphere, mag
+from vpython import box, vector, color, label, sphere, mag, arrow
 import numpy as np
+import time
 
 def generate_rods():    
     return [
@@ -69,4 +70,90 @@ def is_ball_in_net(ball : sphere, net : box):
         if -NET_WIDTH/2 < ball.pos.y < NET_WIDTH/2 and ball.pos.x > TABLE_LENGTH/2 + BALL_RADIUS:
             return True
     return False
+
+
+def check_ball_pawn_collision(ball, ball_velocity, pawn):
+    # Relative position
+    rel_x = ball.pos.x - pawn.pos.x
+    rel_y = ball.pos.y - pawn.pos.y
+
+    # Half sizes (inner rectangle area)
+    inner_half_w = PAWN_SIZE[0] / 2 - PAWN_CORNER_RADIUS
+    inner_half_h = PAWN_SIZE[1] / 2 - PAWN_CORNER_RADIUS
+
+    # Clamp the ball's position to the nearest point on the pawn's rounded rectangle
+    clamped_x = max(-inner_half_w, min(rel_x, inner_half_w))
+    clamped_y = max(-inner_half_h, min(rel_y, inner_half_h))
+
+    # Closest point on the rounded rectangle (including corners)
+    closest_x = pawn.pos.x + clamped_x
+    closest_y = pawn.pos.y + clamped_y
+
+    # Compute vector from closest point to ball center
+    diff_x = ball.pos.x - closest_x
+    diff_y = ball.pos.y - closest_y
+    dist_squared = diff_x**2 + diff_y**2
+    collision_radius = ball.radius + PAWN_CORNER_RADIUS
+
+    # Check actual distance to border
+    if dist_squared <= collision_radius**2:
+        normal = vector(diff_x, diff_y, 0).norm()
+        return normal
+    return None
+
+def specular_reflection(ball_velocity, reflection_normal):
+    # Calculate the dot product of the ball velocity and the reflection normal
+    dot = ball_velocity.x * reflection_normal.x + ball_velocity.y * reflection_normal.y
+    # Reflect the ball velocity using the reflection normal
+    ball_velocity.x -= 2 * dot * reflection_normal.x
+    ball_velocity.y -= 2 * dot * reflection_normal.y
+    return ball_velocity
+
+def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity):
+    opponent_pawns = pawns[1 - player.team]
+    if closest_rod_to_ball == 3: # attackers rod, aim between the opponent's defenders and gk and towards the net (between the posts)
+        pawns_to_avoid = posts + opponent_pawns[0] + opponent_pawns[1] # opponent's posts, goalkeeper and defenders
+        extreme_vectors_x_position = pawns_to_avoid[0].pos.x # goal post position
+        max_vector = vector(extreme_vectors_x_position, NET_WIDTH/2 - BALL_RADIUS, 0.15) - ball.pos
+        min_vector = vector(extreme_vectors_x_position, -NET_WIDTH/2 + BALL_RADIUS, 0.15) - ball.pos
+
+    else:
+        if closest_rod_to_ball in [0, 1]: # goalkeeper and defenders rods, aim between the opponent's attackers
+            pawns_to_avoid = opponent_pawns[3]
+
+        else: # midfielders rod, aim between the opponent's midfielders
+            pawns_to_avoid = opponent_pawns[2]
+
+        extreme_vectors_x_position = pawns_to_avoid[0].pos.x
+        max_vector = vector(extreme_vectors_x_position, TABLE_WIDTH/2 - BALL_RADIUS, 0.15) - ball.pos
+        min_vector = vector(extreme_vectors_x_position, -TABLE_WIDTH/2 + BALL_RADIUS, 0.15) - ball.pos
+
+    directions = []
+    for alpha in np.linspace(0, 1, 20):
+        vec = (1 - alpha) * min_vector + alpha * max_vector
+        directions.append(vec.norm())
+
+
+    best_direction = None
+    best_min_dist = 0
+
+    for direction in directions:
+        min_dist = float('inf')
+        for opponent in pawns_to_avoid:
+            vec_to_opponent = opponent.pos - ball.pos
+            # Distance from point to ray using 2D cross product
+            dist_to_ray = abs(vec_to_opponent.x * direction.y - vec_to_opponent.y * direction.x)
+            min_dist = min(min_dist, dist_to_ray)
+
+        if min_dist > best_min_dist:
+            best_min_dist = min_dist
+            best_direction = direction
+
+    # for direction in directions:
+    #     arrow(pos=ball.pos, axis=direction*100, color=color.red, shaftwidth=0.5)
+    # arrow(pos=ball.pos, axis=best_direction*200, color=color.green, shaftwidth=1)
+    # time.sleep(1)
+    # Apply redirection
+    ball_velocity = best_direction * new_velocity_magnitude
+    return ball_velocity
 

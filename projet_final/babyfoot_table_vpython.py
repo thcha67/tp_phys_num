@@ -1,7 +1,7 @@
 from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
 from player import Player
-from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff, is_ball_in_net
+from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff, is_ball_in_net, check_ball_pawn_collision, specular_reflection, controlled_shot
 
 from config import *
 
@@ -37,6 +37,16 @@ faceoff(ball, ball_velocity)
 net_blue = box(pos=vector(-TABLE_LENGTH/2-NET_DEPTH/2, 0, 0.15), size=vector(NET_DEPTH, NET_WIDTH, NET_THICKNESS), color=color.white)
 net_red = box(pos=vector(TABLE_LENGTH/2+NET_DEPTH/2, 0, 0.15), size=vector(NET_DEPTH, NET_WIDTH, NET_THICKNESS), color=color.white)
 
+blue_posts = [
+    sphere(pos=vector(TABLE_LENGTH/2, -NET_WIDTH/2, 0.15), visible=False),
+    sphere(pos=vector(TABLE_LENGTH/2, NET_WIDTH/2, 0.15), visible=False)
+]
+red_posts = [
+    sphere(pos=vector(-TABLE_LENGTH/2, -NET_WIDTH/2, 0.15), visible=False),
+    sphere(pos=vector(-TABLE_LENGTH/2, NET_WIDTH/2, 0.15), visible=False)
+]
+
+
 
 def update_score(teamNumber : int):
     score[teamNumber] = score[teamNumber] + 1
@@ -49,9 +59,7 @@ maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]
 a = []
 
 most_recent_pawn = None
-# while True:
-for _ in range(1000):
-    print(_)
+while True:
     rate(TIME_MULTIPLIER/DT) # control the simulation speed
     simulation_time += DT
     time_label.text = f"{round(simulation_time, 4)}s"
@@ -97,56 +105,32 @@ for _ in range(1000):
         closest_rod_to_ball = np.argmin(abs(player.rod_positions - ball.pos.x))
 
         new_velocity_magnitude = player.get_velocity()
-        is_ball_controlled = player.is_ball_controlled(mag(ball_velocity))
-        if is_ball_controlled:
-            a.append(1)
-        else:
-            a.append(0)
-        
+        is_ball_controlled = player.is_ball_controlled()
+
         for pawn in player_pawns[closest_rod_to_ball]: # check for collisions with the closest rod to the ball
-            pawn_to_ball = ball.pos - pawn.pos
+            if pawn == most_recent_pawn:
+                continue
+            reflection_normal = check_ball_pawn_collision(ball, ball_velocity, pawn)
 
-            if mag(pawn_to_ball) <= maximal_dist_of_collision and most_recent_pawn != pawn: # possible collision
+            if reflection_normal is not None: # collision detected
+                # ball cannot be controlled when coming from the back of the pawn
+                if ((player.team == 0 and ball_velocity.x > 0 and reflection_normal.x < 0) # blue team
+                or (player.team == 1 and ball_velocity.x < 0 and reflection_normal.x > 0)): # red team 
+                    is_ball_controlled = False
 
-                dx = abs(pawn_to_ball.x)
-                dy = abs(pawn_to_ball.y)
+                # ball cannot be controlled if the player's hand is not on the rod
+                if closest_rod_to_ball not in player.hand_positions:
+                    is_ball_controlled = False
 
-                inner_half_w = PAWN_SIZE[0] / 2 - PAWN_CORNER_RADIUS
-                inner_half_h = PAWN_SIZE[1] / 2 - PAWN_CORNER_RADIUS
-                outer_half_w = inner_half_w + PAWN_CORNER_RADIUS
-                outer_half_h = inner_half_h + PAWN_CORNER_RADIUS
+                if is_ball_controlled: # specular reflection
+                    posts = blue_posts if player.team == 0 else red_posts
+                    ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity)
+                else:
+                    ball_velocity = specular_reflection(ball_velocity, reflection_normal)
+                    # if not hands
+                most_recent_pawn = pawn
+                break
 
-                # Check corner collisions
-                corner_centers = [
-                    vector(pawn.pos.x - inner_half_w, pawn.pos.y - inner_half_h, 0.15),  # bottom left
-                    vector(pawn.pos.x + inner_half_w, pawn.pos.y - inner_half_h, 0.15),  # bottom right
-                    vector(pawn.pos.x - inner_half_w, pawn.pos.y + inner_half_h, 0.15),  # top left
-                    vector(pawn.pos.x + inner_half_w, pawn.pos.y + inner_half_h, 0.15),  # top right
-                ]
-
-                for corner in corner_centers:
-                    diff = ball.pos - corner
-                    dist_squared = diff.x**2 + diff.y**2
-                    collision_radius = ball.radius + PAWN_CORNER_RADIUS
-
-                    if dist_squared <= collision_radius**2:
-                        normal = diff.norm()  # unit vector from corner to ball center
-                        dot = ball_velocity.x * normal.x + ball_velocity.y * normal.y
-                        ball_velocity.x -= 2 * dot * normal.x
-                        ball_velocity.y -= 2 * dot * normal.y
-                        most_recent_pawn = pawn
-                        break
-
-                # Check side collisions
-                if dx <= inner_half_w and dy <= outer_half_h:
-                    ball_velocity.x *= -1
-                    most_recent_pawn = pawn
-                    break
-                elif dy <= inner_half_h and dx <= outer_half_w:
-                    ball_velocity.y *= -1
-                    most_recent_pawn = pawn
-                    break
-    
     net_number = 0
     for net in [net_blue, net_red]:
         if is_ball_in_net(ball, net):

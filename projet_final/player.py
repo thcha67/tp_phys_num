@@ -152,10 +152,10 @@ class Player():
             pawn.pos.y += displacement
 
     def get_velocity(self):
-        return np.random.lognormal(np.log(self.strength + 5), 2/(self.strength + 5), 10000) - 5
+        return 30*np.random.lognormal(np.log(self.strength + 5), 2/(self.strength + 5), 1)[0] - 5
 
-    def is_ball_controlled(self, ball_velocity_magnitude):
-        return 1 - np.exp(-ball_velocity_magnitude / (self.technique * 10))
+    def is_ball_controlled(self):
+        return np.random.rand() < self.technique / 10
 
 
 
