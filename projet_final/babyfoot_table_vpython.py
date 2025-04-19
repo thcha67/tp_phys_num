@@ -1,11 +1,13 @@
 from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
 from player import Player
-from utils import generate_rods, generate_pawns
+from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff
 
 from config import *
 
 import time
+
+np.random.seed(1)
 
 players = [Player(0), Player(1)]
 
@@ -25,10 +27,12 @@ time_label = label(pos=time_box.pos, text=f"{simulation_time}s", xoffset=0, yoff
 
 rods = generate_rods()
 pawns, individual_pawns = generate_pawns()
+hand_identifiers = generate_hand_identifiers()
 
 # Create the ball at the specified position
 ball = sphere(pos=vector(BALL_INITIAL_POSITION[0], BALL_INITIAL_POSITION[1], 0.15), radius=BALL_RADIUS, color=color.white)
 ball_velocity = vector(BALL_INITIAL_VELOCITY_MAGNITUDE*np.cos(BALL_INITIAL_VELOCITY_ANGLE), BALL_INITIAL_VELOCITY_MAGNITUDE*np.sin(BALL_INITIAL_VELOCITY_ANGLE), 0)
+faceoff(ball, ball_velocity)
 
 # Create the nets behind each goalkeeper
 net_blue = box(pos=vector(-TABLE_LENGTH/2-NET_DEPTH/2, 0, 0.15), size=vector(NET_DEPTH, NET_WIDTH, NET_THICKNESS), color=color.white)
@@ -44,7 +48,6 @@ maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]
 
 
 most_recent_pawn = None
-recent_goal = False
 while True:
     rate(TIME_MULTIPLIER/DT) # control the simulation speed
     simulation_time += DT
@@ -52,14 +55,25 @@ while True:
     # Move the ball
     ball.pos += ball_velocity * DT
     
-    #check if players changes hand position, and move the rods TODO: put transition time
+    #check if players changes hand position, and move the rods
     for player in players:
         player_pawns = pawns[player.team]
         player.move_hands(ball)
 
+        #calculate the displacement of each rod
         for i, rod_number in enumerate(player.hand_positions):
             displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_number, i)
             player.move_rod(rod_number, displacement, player_pawns)
+
+        #change the color of the hand identifiers
+        team_color = color.blue
+        if player.team == 1:
+            team_color = color.red
+        for i, hand_iden in enumerate(hand_identifiers[player.team*4 : (player.team+1) * 4]):
+            if i in player.hand_positions:
+                hand_iden.color= team_color
+            else:
+                hand_iden.color = color.gray(0.5)
 
     # apply friction, 0 = no friction
     ball_velocity.x = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.x
@@ -88,7 +102,6 @@ while True:
             outer_half_h = inner_half_h + PAWN_CORNER_RADIUS
 
             # Check side collisions
-            collided = False
             if dx <= inner_half_w and dy <= outer_half_h:
                 ball_velocity.x *= -1
                 most_recent_pawn = pawn
@@ -118,15 +131,18 @@ while True:
                     ball_velocity.y -= 2 * dot * normal.y
                     most_recent_pawn = pawn
                     break
-
+    
     net_number = 0
     for net in [net_blue, net_red]:
-        if not recent_goal:
-            if abs(ball.pos.x - net.pos.x) < (ball.radius + net.size.x / 2) and abs(ball.pos.y - net.pos.y) < (ball.radius + net.size.y / 2):
-                if net_number == 0:
-                    update_score(1)
-                    recent_goal = True
-                else:
-                    update_score(0)
-                    recent_goal = True
+        if abs(ball.pos.x - net.pos.x) < (ball.radius + net.size.x / 2) and abs(ball.pos.y - net.pos.y) < (ball.radius + net.size.y / 2):
+            if net_number == 0:
+                update_score(1)
+                time.sleep(0.5)
+                faceoff(ball, ball_velocity)
+                time.sleep(0.5)
+            else:
+                update_score(0)
+                time.sleep(0.5)
+                faceoff(ball, ball_velocity)
+                time.sleep(0.5)
         net_number += 1
