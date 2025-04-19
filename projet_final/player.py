@@ -37,10 +37,11 @@ class Player():
         with open(f"player{self.team}.json", "r") as f:
             player_config = json.load(f)
 
-        reflex_mutliplier = 50 # magic number to give the possible displcement per DT per reflexes stat point
+        reflex_mutliplier = 50 # magic number to give the possible displacement per DT per reflexes stat point
+        transition_multiplier = 450 #magic number to give the amount of time between transitions per DT per transition stat point
 
         self.reflexes = player_config["reflexes"]*DT*reflex_mutliplier # 0 to 10
-        self.transition_time = player_config["transition_speed"] # 0 to 10
+        self.transition_time = player_config["transition_speed"]*DT*transition_multiplier # 0 to 10
         self.strength = player_config["strength"] # 0 to 10
         self.technique = player_config["technique"] # 0 to 10
         self.strategy = player_config["strategy"] # 0 = gk all time, 1 = opportunistic attack, 2 = def all time, 3 = never midfield
@@ -67,7 +68,7 @@ class Player():
         if hand_pos_has_changed:
             for i in range(2):
                 if self.hand_positions[i] != new_hand_positions[i]:
-                    self.transition_cooldown[i] = self.transition_time
+                    self.transition_cooldown[i] = round(self.transition_time)
             
         self.hand_positions = new_hand_positions
 

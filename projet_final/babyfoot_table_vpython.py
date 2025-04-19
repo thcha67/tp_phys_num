@@ -24,7 +24,6 @@ score_label = label(pos=score_box.pos, text=f"{score[0]}    :   {score[1]}", xof
 time_box = box(pos=vector(250, TABLE_WIDTH/2 + 100,10), size=vector(200,100,0), color=color.gray(0.5))
 time_label = label(pos=time_box.pos, text=f"{simulation_time}s", xoffset=0, yoffset=0, space=score_box.size.x, height=25, border=4, font='sans')
 
-
 rods = generate_rods()
 pawns, individual_pawns = generate_pawns()
 hand_identifiers = generate_hand_identifiers()
@@ -69,9 +68,12 @@ while True:
         team_color = color.blue
         if player.team == 1:
             team_color = color.red
+        hand_idx = 0
         for i, hand_iden in enumerate(hand_identifiers[player.team*4 : (player.team+1) * 4]):
             if i in player.hand_positions:
-                hand_iden.color= team_color
+                if player.transition_cooldown[hand_idx] == 0:
+                    hand_iden.color= team_color
+                hand_idx += 1
             else:
                 hand_iden.color = color.gray(0.5)
 
