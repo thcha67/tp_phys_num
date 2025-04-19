@@ -1,13 +1,13 @@
 from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
 from player import Player
-from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff
+from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff, is_ball_in_net
 
 from config import *
 
 import time
 
-np.random.seed(1)
+np.random.seed(2)
 
 players = [Player(0), Player(1)]
 
@@ -60,8 +60,11 @@ while True:
 
     # Check for collisions with table boundaries
     if abs(ball.pos.x) >= TABLE_LENGTH/2 - BALL_RADIUS:
-        ball_velocity.x *= -1
-        most_recent_pawn = None
+        if -NET_WIDTH/2 + BALL_RADIUS < ball.pos.y < NET_WIDTH/2 - BALL_RADIUS: #its going into the net
+            pass
+        else:
+            ball_velocity.x *= -1
+            most_recent_pawn = None
 
     if abs(ball.pos.y) >= TABLE_WIDTH/2 - BALL_RADIUS:
         ball_velocity.y *= -1
@@ -137,7 +140,7 @@ while True:
     
     net_number = 0
     for net in [net_blue, net_red]:
-        if abs(ball.pos.x - net.pos.x) < (ball.radius + net.size.x / 2) and abs(ball.pos.y - net.pos.y) < (ball.radius + net.size.y / 2):
+        if is_ball_in_net(ball, net):
             if net_number == 0:
                 update_score(1)
                 time.sleep(0.5)
