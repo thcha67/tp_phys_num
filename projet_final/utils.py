@@ -2,7 +2,7 @@ from config import *
 from vpython import box, vector, color, label, sphere, mag
 import numpy as np
 
-def generate_rods():
+def generate_rods():    
     return [
     box(
         pos=vector(rod_position, 0, 0.15), 
@@ -32,22 +32,23 @@ def generate_pawns():
     pawn_positions = [gk_pos, def_pos, mid_pos, att_pos]
 
     # Create the players
-    individual_pawns: list[box] = []
+    blue_pawns: list[box] = []
+    red_pawns: list[box] = []
 
     # blue
     for i, rod_pos in enumerate(BLUE_ROD_POSITIONS):
         for pawn_pos in pawn_positions[i]:
-            individual_pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(PAWN_SIZE[0], PAWN_SIZE[1], 1), color=color.blue))
+            blue_pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(PAWN_SIZE[0], PAWN_SIZE[1], 1), color=color.blue))
 
     # red
     for i, rod_pos in enumerate(RED_ROD_POSITIONS):
         for pawn_pos in pawn_positions[i]:
-            individual_pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(PAWN_SIZE[0], PAWN_SIZE[1], 1), color=color.red))
+            red_pawns.append(box(pos=vector(rod_pos, pawn_pos, 0.15), size=vector(PAWN_SIZE[0], PAWN_SIZE[1], 1), color=color.red))
 
     return  [
-        [[individual_pawns[0]], [defender for defender in individual_pawns[1:3]], [mid for mid in individual_pawns[3:8]], [att for att in individual_pawns[8:11]]],
-        [[individual_pawns[11]], [defender for defender in individual_pawns[12:14]], [mid for mid in individual_pawns[14:19]], [att for att in individual_pawns[19:22]]]
-    ], individual_pawns
+        [[blue_pawns[0]], [defender for defender in blue_pawns[1:3]], [mid for mid in blue_pawns[3:8]], [att for att in blue_pawns[8:11]]],
+        [[red_pawns[0]], [defender for defender in red_pawns[1:3]], [mid for mid in red_pawns[3:8]], [att for att in red_pawns[8:11]]]
+    ], blue_pawns + red_pawns
 
 def faceoff(ball : sphere, ball_velocity : vector):
     ball.pos.x, ball.pos.y = np.random.uniform(-20, 20), np.random.uniform(-TABLE_WIDTH/2, TABLE_WIDTH/2)
