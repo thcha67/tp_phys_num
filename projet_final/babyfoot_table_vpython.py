@@ -84,7 +84,9 @@ while True:
     # Check for collisions with table boundaries
     if abs(ball.pos.x) >= TABLE_LENGTH/2 - BALL_RADIUS:
         if -NET_WIDTH/2 + BALL_RADIUS < ball.pos.y < NET_WIDTH/2 - BALL_RADIUS: #its going into the net
-            pass
+            if abs(ball.pos.y) >= NET_WIDTH/2 - BALL_RADIUS:
+                ball_velocity.y *= -1
+                most_recent_pawn = None
         else:
             ball_velocity.x *= -1
             most_recent_pawn = None
