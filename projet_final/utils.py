@@ -51,7 +51,7 @@ def generate_pawns():
     ], blue_pawns + red_pawns
 
 def faceoff(ball : sphere, ball_velocity : vector):
-    ball.pos.x, ball.pos.y = np.random.uniform(-20, 20), np.random.uniform(-TABLE_WIDTH/2, TABLE_WIDTH/2)
+    ball.pos.x, ball.pos.y = np.random.uniform(-20, 20), np.random.uniform(-TABLE_WIDTH/3, TABLE_WIDTH/3)
     ball_velocity.x, ball_velocity.y = np.random.uniform(-20, 20), np.random.uniform(-20, 20)
 
     while ball_velocity.x == 0 or ball_velocity.y == 0:
