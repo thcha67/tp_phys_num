@@ -1,0 +1,7 @@
+- Implémenter technique [Thomas] : double gaussienne, pondérée par le stat
+- Implémenter force de frappe [Thomas] : magnitude de la distribution
+- Joueurs qui se tassent du chemin pour laisser la balle passer [Simon]
+- Calibration des magic numbers pour stats des joueurs
+- Calibration force de friction
+- raffiner simulation pour qu'elle représente vrai vie
+- Bâtir cadre pour simulations
