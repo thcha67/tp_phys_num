@@ -38,7 +38,7 @@ class Player():
         with open(f"player{self.team}.json", "r") as f:
             player_config = json.load(f)
 
-        reflex_mutliplier = 50 # magic number to give the possible displacement per DT per reflexes stat point
+        reflex_mutliplier = 25 # magic number to give the possible displacement per DT per reflexes stat point
         transition_multiplier = 450 #magic number to give the amount of time between transitions per DT per transition stat point
 
         self.reflexes = player_config["reflexes"]*DT*reflex_mutliplier # 0 to 10
@@ -152,7 +152,7 @@ class Player():
             pawn.pos.y += displacement
 
     def get_velocity(self):
-        return 30*np.random.lognormal(np.log(self.strength + 5), 2/(self.strength + 5), 1)[0] - 5
+        return 40*(np.random.lognormal(np.log(self.strength), 5/(self.strength + 5), 1)[0] + 10)
 
     def is_ball_controlled(self):
         return np.random.rand() < self.technique / 10

@@ -107,7 +107,7 @@ def specular_reflection(ball_velocity, reflection_normal):
     # Reflect the ball velocity using the reflection normal
     ball_velocity.x -= 2 * dot * reflection_normal.x
     ball_velocity.y -= 2 * dot * reflection_normal.y
-    return ball_velocity
+    return ball_velocity*0.9 # 10% speed loss on collision
 
 def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity):
     opponent_pawns = pawns[1 - player.team]
@@ -118,9 +118,10 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
         min_vector = vector(extreme_vectors_x_position, -NET_WIDTH/2 + BALL_RADIUS, 0.15) - ball.pos
 
     else:
-        if closest_rod_to_ball in [0, 1]: # goalkeeper and defenders rods, aim between the opponent's attackers
+        if closest_rod_to_ball == 0: # goalkeeper rod, aim between the opponent's attackers and own defenders
+            pawns_to_avoid = opponent_pawns[3] + pawns[player.team][1]
+        elif closest_rod_to_ball == 1: # defenders rods, aim between the opponent's attackers
             pawns_to_avoid = opponent_pawns[3]
-
         else: # midfielders rod, aim between the opponent's midfielders
             pawns_to_avoid = opponent_pawns[2]
 
