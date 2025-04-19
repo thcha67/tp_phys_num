@@ -84,26 +84,25 @@ class Player():
         
         rod_pawns = pawns[rod_number]
         
-        if rod_number == 0:  #TODO : PROBLÈME QUE LE GARDIEN BOUGE TOUJOURS QUAND BALLE EN SECTION 2 MÊME AVEC STRATÉGIE ALL OPPORTUNISTIC
+        if rod_number == 0:
             delta_y = ball.pos.y - rod_pawns[0].pos.y
             gk_displacement = max(-self.reflexes, min(self.reflexes, delta_y))
             if self.is_gk_displacement_allowed(rod_pawns, gk_displacement):
                 return gk_displacement
             else:
                 return 0
-
-        if (self.team == 0 and ball_velocity.x > 0) or (self.team == 1 and ball_velocity.x < 0):
-            return 0 # ball goes towards opposing net
-
-        elif (self.team == 0 and ball.pos.x < rod_pos_x) or (self.team == 1 and ball.pos.x > rod_pos_x):
-            return 0 # la balle est derrière le joueur, donc bouge pas le pawn
-        
+            
         delta_x = rod_pos_x - ball.pos.x
         predicted_hit_y = delta_x * ball_velocity.y/ball_velocity.x + ball.pos.y
 
-
         # bind predicted_hit_y to the table limits
         predicted_hit_y = max(-TABLE_WIDTH/2 + SPRING_LENGTH, min(TABLE_WIDTH/2 - SPRING_LENGTH, predicted_hit_y))
+
+        if (self.team == 0 and ball_velocity.x > 0) or (self.team == 1 and ball_velocity.x < 0):
+            return 0
+
+        elif (self.team == 0 and ball.pos.x < rod_pos_x) or (self.team == 1 and ball.pos.x > rod_pos_x):
+            return 0 # la balle est derrière le joueur, donc bouge pas le pawn
 
         if predicted_hit_y >= self.width_range:
             index_of_pawn = len(rod_pawns) - 1

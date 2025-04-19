@@ -60,3 +60,12 @@ def faceoff(ball : sphere, ball_velocity : vector):
     ball_velocity.x, ball_velocity.y = mag_factor*ball_velocity.x, mag_factor*ball_velocity.y
     return ball, ball_velocity
 
+def is_ball_in_net(ball : sphere, net : box):
+    if net.pos.x < 0:
+        if -NET_WIDTH/2 < ball.pos.y < NET_WIDTH/2 and ball.pos.x < -TABLE_LENGTH/2 - BALL_RADIUS:
+            return True
+    else:
+        if -NET_WIDTH/2 < ball.pos.y < NET_WIDTH/2 and ball.pos.x > TABLE_LENGTH/2 + BALL_RADIUS:
+            return True
+    return False
+
