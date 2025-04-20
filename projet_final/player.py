@@ -94,6 +94,10 @@ class Player():
                 return 0
             
         delta_x = rod_pos_x - ball.pos.x
+
+        if ball_velocity.x == 0: # ball direction is vertical, happens in passes
+            return 0
+
         predicted_hit_y = delta_x * ball_velocity.y/ball_velocity.x + ball.pos.y
 
         # bind predicted_hit_y to the table limits
