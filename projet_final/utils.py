@@ -90,7 +90,7 @@ def is_ball_in_net(ball : sphere, net : box):
     return False
 
 
-def check_ball_pawn_collision(ball, pawn):
+def check_ball_pawn_collision(ball, ball_velocity, pawn):
     # Relative position
     rel_x = ball.pos.x - pawn.pos.x
     rel_y = ball.pos.y - pawn.pos.y

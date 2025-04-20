@@ -96,9 +96,6 @@ class Player():
         delta_x = rod_pos_x - ball.pos.x
         predicted_hit_y = delta_x * ball_velocity.y/ball_velocity.x + ball.pos.y
 
-        # a noise of \pm 5 is added to the predicted hit y position, only effective on last displacement before hit because of the relfexes stat limitation
-        predicted_hit_y += np.random.normal(0, 5)
-
         # bind predicted_hit_y to the table limits
         predicted_hit_y = max(-TABLE_WIDTH/2 + SPRING_LENGTH, min(TABLE_WIDTH/2 - SPRING_LENGTH, predicted_hit_y))
 
