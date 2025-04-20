@@ -54,6 +54,7 @@ maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]
 a = []
 
 most_recent_pawn = None
+displacement_error = np.random.normal(-5, 5)
 gameOver = False
 while not gameOver:
     rate(TIME_MULTIPLIER/DT) # control the simulation speed
@@ -85,7 +86,7 @@ while not gameOver:
 
         #calculate the displacement of each rod
         for i, rod_index in enumerate(player.hand_positions):
-            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_index, i)
+            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_index, i, displacement_error)
             player.move_rod(rod_index, displacement, player_pawns)
 
         #change the color of the hand identifiers
@@ -131,6 +132,7 @@ while not gameOver:
                     ball_velocity = specular_reflection(ball_velocity, reflection_normal)
                         # if not hands
                 most_recent_pawn = pawn
+                displacement_error = np.random.normal(-5, 5)
                 break
 
     net_number = 0
