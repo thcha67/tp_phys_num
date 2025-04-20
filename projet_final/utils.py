@@ -134,7 +134,6 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
         vec = (1 - alpha) * min_vector + alpha * max_vector
         directions.append(vec.norm())
 
-
     best_direction = None
     best_min_dist = 0
 
@@ -157,4 +156,17 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
     # Apply redirection
     ball_velocity = best_direction * new_velocity_magnitude
     return ball_velocity
+
+def pass_ball(pawn, rod_pawns, new_velocity_magnitude):
+    # find the rod pawn that is the closest to the position y=0
+    other_pawns = [rod_pawn for rod_pawn in rod_pawns if rod_pawn != pawn]
+    closest_pawn = min(other_pawns, key=lambda x: abs(x.pos.y))
+
+    direction = closest_pawn.pos - pawn.pos
+    direction = direction.norm()
+
+    # Apply redirection
+    ball_velocity = direction * new_velocity_magnitude
+    return ball_velocity
+    
 

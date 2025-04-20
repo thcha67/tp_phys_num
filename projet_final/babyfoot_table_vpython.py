@@ -1,7 +1,7 @@
 from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
 from player import Player
-from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff, is_ball_in_net, check_ball_pawn_collision, specular_reflection, controlled_shot
+from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff, is_ball_in_net, check_ball_pawn_collision, specular_reflection, controlled_shot, pass_ball
 
 from config import *
 
@@ -105,29 +105,43 @@ while True:
         closest_rod_to_ball = np.argmin(abs(player.rod_positions - ball.pos.x))
 
         new_velocity_magnitude = player.get_velocity()
-        is_ball_controlled = player.is_ball_controlled()
+        
+        is_ball_controlled = player.is_ball_controlled(mag(ball_velocity))
+        can_pass = player.can_pass(mag(ball_velocity))
 
-        for pawn in player_pawns[closest_rod_to_ball]: # check for collisions with the closest rod to the ball
+        rod_pawns = player_pawns[closest_rod_to_ball]
+
+        for pawn in rod_pawns: # check for collisions with the closest rod to the ball
             if pawn == most_recent_pawn:
                 continue
             reflection_normal = check_ball_pawn_collision(ball, ball_velocity, pawn)
 
             if reflection_normal is not None: # collision detected
-                # ball cannot be controlled when coming from the back of the pawn
-                if ((player.team == 0 and ball_velocity.x > 0 and reflection_normal.x < 0) # blue team
-                or (player.team == 1 and ball_velocity.x < 0 and reflection_normal.x > 0)): # red team 
-                    is_ball_controlled = False
 
                 # ball cannot be controlled if the player's hand is not on the rod
                 if closest_rod_to_ball not in player.hand_positions:
                     is_ball_controlled = False
 
+                relative_incoming_angle = reflection_normal.diff_angle(vector(1 - 2*player.team, 0, 0)) # pi: from the back, pi/2 on top or bottom, 0 from the front
+
+                if relative_incoming_angle > np.pi/2: # ball is coming from the back of the pawn (back side or back corners)
+                    is_ball_controlled *= np.random.rand() < 0.25 # divide the probability of controlling the ball by 4
+
+                elif relative_incoming_angle != 0: # ball is coming from top/bottom or front corners
+                    is_ball_controlled *= np.random.rand() < 0.5 # divide the probability of controlling the ball by 2
+                
                 if is_ball_controlled: # specular reflection
-                    posts = blue_posts if player.team == 0 else red_posts
-                    ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity)
+                    if can_pass and closest_rod_to_ball != 0: # goalkeeper cannot pass
+                        print("pass")
+                        ball_velocity = pass_ball(pawn, rod_pawns, new_velocity_magnitude)
+                    else:
+                        print("shot")
+                        posts = blue_posts if player.team == 0 else red_posts
+                        ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity)
                 else:
+                    print("not controlled")
                     ball_velocity = specular_reflection(ball_velocity, reflection_normal)
-                    # if not hands
+                        # if not hands
                 most_recent_pawn = pawn
                 break
 

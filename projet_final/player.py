@@ -154,8 +154,13 @@ class Player():
     def get_velocity(self):
         return 40*(np.random.lognormal(np.log(self.strength), 5/(self.strength + 5), 1)[0] + 10)
 
-    def is_ball_controlled(self):
-        return np.random.rand() < self.technique / 10
+    def is_ball_controlled(self, velocity_magnitude):
+        velocity_correction = 1 - (velocity_magnitude / BALL_MAX_VELOCITY / 2) # 0.5 for a velocity max and 1 for a velocity min
+        return np.random.rand() < (self.technique / 10 * velocity_correction) # technique 10 player with minimal velocity controlled 10/10 times
+    
+    def can_pass(self, velocity_magnitude):
+        velocity_correction = 1 - (velocity_magnitude / BALL_MAX_VELOCITY / 2)
+        return np.random.rand() < (self.technique / 10 / 2 * velocity_correction) # technique 10 player with minimal velocity passed 5/10 times
 
 
 
