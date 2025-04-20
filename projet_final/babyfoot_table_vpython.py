@@ -54,7 +54,7 @@ maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]
 a = []
 
 most_recent_pawn = None
-displacement_error = np.random.normal(-5, 5)
+displacement_error = np.random.normal(0, 5)
 gameOver = False
 while not gameOver:
     rate(TIME_MULTIPLIER/DT) # control the simulation speed
@@ -132,7 +132,7 @@ while not gameOver:
                     ball_velocity = specular_reflection(ball_velocity, reflection_normal)
                         # if not hands
                 most_recent_pawn = pawn
-                displacement_error = np.random.normal(-5, 5)
+                displacement_error = np.random.normal(0, 5)
                 break
 
     net_number = 0
