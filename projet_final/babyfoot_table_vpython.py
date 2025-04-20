@@ -123,14 +123,11 @@ while not gameOver:
                 
                 if is_ball_controlled: # specular reflection
                     if can_pass and closest_rod_to_ball != 0: # goalkeeper cannot pass
-                        print("pass")
                         ball_velocity = pass_ball(pawn, rod_pawns, new_velocity_magnitude)
                     else:
-                        print("shot")
                         posts = blue_posts if player.team == 0 else red_posts
                         ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity)
                 else:
-                    print("not controlled")
                     ball_velocity = specular_reflection(ball_velocity, reflection_normal)
                         # if not hands
                 most_recent_pawn = pawn
