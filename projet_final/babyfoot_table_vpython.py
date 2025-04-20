@@ -105,7 +105,7 @@ while not gameOver:
         for pawn in rod_pawns: # check for collisions with the closest rod to the ball
             if pawn == most_recent_pawn:
                 continue
-            reflection_normal = check_ball_pawn_collision(ball, ball_velocity, pawn)
+            reflection_normal = check_ball_pawn_collision(ball, pawn)
 
             if reflection_normal is not None: # collision detected
 
