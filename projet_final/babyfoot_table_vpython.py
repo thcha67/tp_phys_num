@@ -8,7 +8,7 @@ from config import *
 import time
 import json
 
-np.random.seed(2)
+np.random.seed(3)
 
 players : list[Player] = [Player(0), Player(1)]
 
