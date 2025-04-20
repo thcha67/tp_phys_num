@@ -60,6 +60,15 @@ def generate_pawns():
         [[red_pawns[0]], [defender for defender in red_pawns[1:3]], [mid for mid in red_pawns[3:8]], [att for att in red_pawns[8:11]]]
     ], blue_pawns + red_pawns
 
+def generate_boxes(score, simulation_time, game_number):
+    score_box = box(pos=vector(0, TABLE_WIDTH/2 + 100,10), size=vector(250,100,0), color=color.gray(0.5))
+    score_label = label(pos=score_box.pos, text=f"{score[0]}    :   {score[1]}", xoffset=0, yoffset=0, space=score_box.size.x, height=25, border=4, font='sans')
+    time_box = box(pos=vector(250, TABLE_WIDTH/2 + 100,10), size=vector(200,100,0), color=color.gray(0.5))
+    time_label = label(pos=time_box.pos, text=f"{simulation_time}s", xoffset=0, yoffset=0, space=time_box.size.x, height=25, border=4, font='sans')
+    game_number_box = box(pos=vector(-250, TABLE_WIDTH/2 + 100,10), size=vector(200,100,0), color=color.gray(0.5))
+    game_number_label = label(pos=game_number_box.pos, text=f"Game {game_number}", xoffset=0, yoffset=0, space=game_number_box.size.x, height=25, border=4, font='sans')
+    return score_box, score_label, time_box, time_label
+
 def faceoff(ball : sphere, ball_velocity : vector):
     ball.pos.x, ball.pos.y = np.random.uniform(-20, 20), np.random.uniform(-TABLE_WIDTH/3, TABLE_WIDTH/3)
     ball_velocity.x, ball_velocity.y = np.random.uniform(-20, 20), np.random.uniform(-20, 20)
