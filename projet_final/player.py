@@ -99,11 +99,11 @@ class Player():
         # bind predicted_hit_y to the table limits
         predicted_hit_y = max(-TABLE_WIDTH/2 + SPRING_LENGTH, min(TABLE_WIDTH/2 - SPRING_LENGTH, predicted_hit_y))
 
-        if (self.team == 0 and ball_velocity.x > 0) or (self.team == 1 and ball_velocity.x < 0):
+        if_list = [[ball_velocity.x, 0, rod_pos_x, ball.pos.x], [0, ball_velocity.x, ball.pos.x, rod_pos_x]][self.team]
+        if (if_list[0] > if_list[1] or if_list[2] > if_list[3]): #ball is behind the rod, OR velocity towards the opposing net
+            if (if_list[0] > if_list[1] and if_list[2] > if_list[3]): #ball is behind the rod, AND the velocity is towards opponent net
+                return self.pawn_ball_exit_displacement(rod_pawns, predicted_hit_y)
             return 0
-
-        elif (self.team == 0 and ball.pos.x < rod_pos_x) or (self.team == 1 and ball.pos.x > rod_pos_x):
-            return 0 # la balle est derrière le joueur, donc bouge pas le pawn
 
         if predicted_hit_y >= self.width_range:
             index_of_pawn = len(rod_pawns) - 1
@@ -162,5 +162,16 @@ class Player():
         velocity_correction = 1 - (velocity_magnitude / BALL_MAX_VELOCITY / 2)
         return np.random.rand() < (self.technique / 10 / 2 * velocity_correction) # technique 10 player with minimal velocity passed 5/10 times
 
+    def pawn_ball_exit_displacement(self, rod_pawns, predicted_hit_y):
+        displacement = 0
+        for pawn in rod_pawns:
+            #check if pawn is blocking ball exit
+            if predicted_hit_y - PAWN_SIZE[1]/2 - BALL_RADIUS - 5 < pawn.pos.y < predicted_hit_y + PAWN_SIZE[1]/2 + BALL_RADIUS + 5:
+                if predicted_hit_y - pawn.pos.y < 0:
+                    displacement = self.reflexes
+                else:
+                    displacement = -self.reflexes
 
-
+                if not self.is_displacement_allowed(rod_pawns, displacement):
+                    displacement = -displacement
+        return displacement

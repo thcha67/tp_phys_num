@@ -1,7 +1,16 @@
 from config import *
 from vpython import box, vector, color, label, sphere, mag, arrow
 import numpy as np
+from player import Player
 import time
+
+def update_score(teamNumber : int, score, score_label):
+    score[teamNumber] = score[teamNumber] + 1
+    score_label.text = f"{score[0]}    :   {score[1]}"
+
+    if score[teamNumber] == 10:
+        return True
+    return False
 
 def generate_rods():    
     return [
@@ -157,6 +166,14 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
     ball_velocity = best_direction * new_velocity_magnitude
     return ball_velocity
 
+def change_hand_identifier_color(transition_idx : int, hand_idx : int, player : Player, hand_iden : box):
+    if hand_idx in player.hand_positions:
+        if player.transition_cooldown[transition_idx] == 0:
+            hand_iden.color = player.color
+        transition_idx += 1
+    else:
+        hand_iden.color = color.gray(0.5)
+
 def pass_ball(pawn, rod_pawns, new_velocity_magnitude):
     # find the rod pawn that is the closest to the position y=0
     other_pawns = [rod_pawn for rod_pawn in rod_pawns if rod_pawn != pawn]
@@ -168,5 +185,3 @@ def pass_ball(pawn, rod_pawns, new_velocity_magnitude):
     # Apply redirection
     ball_velocity = direction * new_velocity_magnitude
     return ball_velocity
-    
-

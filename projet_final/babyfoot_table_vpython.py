@@ -1,15 +1,16 @@
 from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
 from player import Player
-from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff, is_ball_in_net, check_ball_pawn_collision, specular_reflection, controlled_shot, pass_ball
-
+from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff, is_ball_in_net, check_ball_pawn_collision, specular_reflection, controlled_shot, change_hand_identifier_color, update_score
+from utils import pass_ball
 from config import *
 
 import time
+import json
 
-np.random.seed(2)
+np.random.seed(3)
 
-players = [Player(0), Player(1)]
+players : list[Player] = [Player(0), Player(1)]
 
 score = [0, 0]  #[blue team goals, red team goals]
 simulation_time = 0
@@ -47,19 +48,14 @@ red_posts = [
 ]
 
 
-
-def update_score(teamNumber : int):
-    score[teamNumber] = score[teamNumber] + 1
-    score_label.text = f"{score[0]}    :   {score[1]}"
-
-
 maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]**2) #maximal distance between the ball and the player to be considered as a collision
 
 
 a = []
 
 most_recent_pawn = None
-while True:
+gameOver = False
+while not gameOver:
     rate(TIME_MULTIPLIER/DT) # control the simulation speed
     simulation_time += DT
     time_label.text = f"{round(simulation_time, 4)}s"
@@ -93,14 +89,9 @@ while True:
             player.move_rod(rod_index, displacement, player_pawns)
 
         #change the color of the hand identifiers
-        hand_idx = 0
+        transition_idx = 0
         for i, hand_iden in enumerate(hand_identifiers[player.team*4 : (player.team+1) * 4]):
-            if i in player.hand_positions:
-                if player.transition_cooldown[hand_idx] == 0:
-                    hand_iden.color = player.color
-                hand_idx += 1
-            else:
-                hand_iden.color = color.gray(0.5)
+            change_hand_identifier_color(transition_idx, i, player, hand_iden)
 
         closest_rod_to_ball = np.argmin(abs(player.rod_positions - ball.pos.x))
 
@@ -149,16 +140,36 @@ while True:
     for net in [net_blue, net_red]:
         if is_ball_in_net(ball, net):
             if net_number == 0:
-                update_score(1)
+                gameOver = update_score(1, score, score_label)
                 time.sleep(0.5)
                 faceoff(ball, ball_velocity)
                 time.sleep(0.5)
             else:
-                update_score(0)
+                gameOver = update_score(0, score, score_label)
                 time.sleep(0.5)
                 faceoff(ball, ball_velocity)
                 time.sleep(0.5)
         net_number += 1
 
+# Write the JSON data to a file
+data = {
+    "game_score": score,
+    "player_0" : {
+    "reflexes": players[0].reflexes,
+    "transition_speed": players[0].transition_time, 
+    "strength": players[0].strength, 
+    "technique": players[0].technique, 
+    "strategy": players[0].strategy
+    },
+    "player_1" : {
+    "reflexes": players[1].reflexes,
+    "transition_speed": players[1].transition_time, 
+    "strength": players[1].strength, 
+    "technique": players[1].technique, 
+    "strategy": players[1].strategy
+    },
+    "time" : time.strftime("%Y-%m-%d %H:%M:%S")
+}
 
-print(np.mean(a))
+with open('simulation_data.json', 'w') as json_file:
+    json.dump(data, json_file, indent = 4)
