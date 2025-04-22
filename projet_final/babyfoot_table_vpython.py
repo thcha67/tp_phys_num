@@ -56,6 +56,9 @@ a = []
 most_recent_pawn = None
 displacement_error = np.random.normal(0, 5)
 gameOver = False
+
+flag = True
+
 while not gameOver:
     rate(TIME_MULTIPLIER/DT) # control the simulation speed
     simulation_time += DT
@@ -113,7 +116,6 @@ while not gameOver:
             reflection_normal = check_ball_pawn_collision(ball, pawn)
 
             if reflection_normal is not None: # collision detected
-
                 # ball cannot be controlled if the player's hand is not on the rod
                 if closest_rod_to_ball not in player.hand_positions:
                     is_ball_controlled = False
@@ -129,7 +131,10 @@ while not gameOver:
                 if is_ball_controlled: # specular reflection
                     if can_pass and closest_rod_to_ball != 0: # goalkeeper cannot pass
                         ball_velocity = pass_ball(pawn, rod_pawns, new_velocity_magnitude)
+                        ball.pos.x = pawn.pos.x
+                        flag = True
                     else:
+                        flag = False
                         posts = blue_posts if player.team == 0 else red_posts
                         ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity)
                 else:

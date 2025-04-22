@@ -181,7 +181,7 @@ def pass_ball(pawn, rod_pawns, new_velocity_magnitude):
 
     direction = closest_pawn.pos - pawn.pos
     direction = direction.norm()
-
+    
     # Apply redirection
     ball_velocity = direction * new_velocity_magnitude / 10
     return ball_velocity
