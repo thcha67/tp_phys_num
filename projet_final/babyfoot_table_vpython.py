@@ -73,10 +73,14 @@ while not gameOver:
             pass
         else:
             ball_velocity.x *= -1
+            ball_velocity *= 0.75
+            ball.pos.x = np.sign(ball.pos.x) * (TABLE_LENGTH/2 - BALL_RADIUS) # set the ball position to the edge of the table
             most_recent_pawn = None
 
     if abs(ball.pos.y) >= TABLE_WIDTH/2 - BALL_RADIUS:
         ball_velocity.y *= -1
+        ball_velocity *= 0.75
+        ball.pos.y = np.sign(ball.pos.y) * (TABLE_WIDTH/2 - BALL_RADIUS) # set the ball position to the edge of the table
         most_recent_pawn = None
     
     #check if players changes hand position, and move the rods. Also check for collisions with the pawns

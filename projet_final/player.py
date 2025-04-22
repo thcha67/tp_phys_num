@@ -159,7 +159,7 @@ class Player():
             pawn.pos.y += displacement
 
     def get_velocity(self):
-        return 40*(np.random.lognormal(np.log(self.strength), 5/(self.strength + 5), 1)[0] + 10)
+        return 400*(np.random.lognormal(np.log(self.strength), 5/(self.strength + 5), 1)[0] + 10)
 
     def is_ball_controlled(self, velocity_magnitude):
         velocity_correction = 1 - (velocity_magnitude / BALL_MAX_VELOCITY / 2) # 0.5 for a velocity max and 1 for a velocity min
