@@ -116,7 +116,7 @@ def specular_reflection(ball_velocity, reflection_normal):
     # Reflect the ball velocity using the reflection normal
     ball_velocity.x -= 2 * dot * reflection_normal.x
     ball_velocity.y -= 2 * dot * reflection_normal.y
-    return ball_velocity*0.75 # 10% speed loss on collision
+    return ball_velocity*0.8 # 10% speed loss on collision
 
 def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity):
     opponent_pawns = pawns[1 - player.team]
@@ -158,10 +158,10 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
             best_min_dist = min_dist
             best_direction = direction
 
-    for direction in directions:
-        arrow(pos=ball.pos, axis=direction*100, color=color.red, shaftwidth=0.5)
-    arrow(pos=ball.pos, axis=best_direction*200, color=color.green, shaftwidth=1)
-    time.sleep(1)
+    # for direction in directions:
+    #     arrow(pos=ball.pos, axis=direction*100, color=color.red, shaftwidth=0.5)
+    # arrow(pos=ball.pos, axis=best_direction*200, color=color.green, shaftwidth=1)
+    # time.sleep(1)
     # Apply redirection
     ball_velocity = best_direction * new_velocity_magnitude
     return ball_velocity
@@ -183,5 +183,5 @@ def pass_ball(pawn, rod_pawns, new_velocity_magnitude):
     direction = direction.norm()
     
     # Apply redirection
-    ball_velocity = direction * new_velocity_magnitude / 10
+    ball_velocity = direction * new_velocity_magnitude / 10 # 10% of the velocity for passess
     return ball_velocity

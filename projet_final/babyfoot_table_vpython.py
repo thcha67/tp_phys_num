@@ -8,7 +8,7 @@ from config import *
 import time
 import json
 
-np.random.seed(3)
+np.random.seed(0)
 
 players : list[Player] = [Player(0), Player(1)]
 
@@ -57,8 +57,6 @@ most_recent_pawn = None
 displacement_error = np.random.normal(0, 5)
 gameOver = False
 
-flag = True
-
 while not gameOver:
     rate(TIME_MULTIPLIER/DT) # control the simulation speed
     simulation_time += DT
@@ -72,17 +70,17 @@ while not gameOver:
 
     # Check for collisions with table boundaries
     if abs(ball.pos.x) >= TABLE_LENGTH/2 - BALL_RADIUS:
-        if -NET_WIDTH/2 + BALL_RADIUS < ball.pos.y < NET_WIDTH/2 - BALL_RADIUS: #its going into the net
+        if -NET_WIDTH/2 + BALL_RADIUS < ball.pos.y < NET_WIDTH/2 - BALL_RADIUS: #its going into the net TODO improve for small DT
             pass
         else:
             ball_velocity.x *= -1
-            ball_velocity *= 0.75
+            ball_velocity *= 0.5
             ball.pos.x = np.sign(ball.pos.x) * (TABLE_LENGTH/2 - BALL_RADIUS) # set the ball position to the edge of the table
             most_recent_pawn = None
 
     if abs(ball.pos.y) >= TABLE_WIDTH/2 - BALL_RADIUS:
         ball_velocity.y *= -1
-        ball_velocity *= 0.75
+        ball_velocity *= 0.5
         ball.pos.y = np.sign(ball.pos.y) * (TABLE_WIDTH/2 - BALL_RADIUS) # set the ball position to the edge of the table
         most_recent_pawn = None
     
@@ -104,8 +102,9 @@ while not gameOver:
         closest_rod_to_ball = np.argmin(abs(player.rod_positions - ball.pos.x))
 
         new_velocity_magnitude = player.get_velocity()
-        
+
         is_ball_controlled = player.is_ball_controlled(mag(ball_velocity))
+
         can_pass = player.can_pass(mag(ball_velocity))
 
         rod_pawns = player_pawns[closest_rod_to_ball]
@@ -124,17 +123,14 @@ while not gameOver:
 
                 if relative_incoming_angle > np.pi/2: # ball is coming from the back of the pawn (back side or back corners)
                     is_ball_controlled *= np.random.rand() < 0.25 # divide the probability of controlling the ball by 4
-
                 elif relative_incoming_angle != 0: # ball is coming from top/bottom or front corners
                     is_ball_controlled *= np.random.rand() < 0.5 # divide the probability of controlling the ball by 2
-                
+
                 if is_ball_controlled: # specular reflection
                     if can_pass and closest_rod_to_ball != 0: # goalkeeper cannot pass
                         ball_velocity = pass_ball(pawn, rod_pawns, new_velocity_magnitude)
                         ball.pos.x = pawn.pos.x
-                        flag = True
                     else:
-                        flag = False
                         posts = blue_posts if player.team == 0 else red_posts
                         ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity)
                 else:

@@ -52,16 +52,18 @@ class Player():
         ball_section = 0 # intially set to defense
         
         if self.team == 0: # blue team
-            if ball.pos.x > self.rod_positions[3]: # ball further than attacker rod
+            if ball.pos.x >= self.rod_positions[3]: # ball further than attacker rod
                 ball_section = 2
-            elif ball.pos.x > self.rod_positions[2]: #ball in midfield
+            elif ball.pos.x >= self.rod_positions[2]: #ball in midfield
                 ball_section = 1
 
         else: # red team
-            if ball.pos.x < self.rod_positions[3]: # ball further than attacker rod
+            if ball.pos.x <= self.rod_positions[3]: # ball further than attacker rod
                 ball_section = 2
-            elif ball.pos.x < self.rod_positions[2]: #ball in midfield
+            elif ball.pos.x <= self.rod_positions[2]: #ball in midfield
                 ball_section = 1
+
+        # print(self.team, ball_section, self.hand_positions)
 
         new_hand_positions = self.strategy_to_hand_positions[self.strategy][ball_section]
 

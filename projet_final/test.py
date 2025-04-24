@@ -4,11 +4,16 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
+a = False
 
-for strength in [1, 3, 8, 10]:
-    vs = 500*np.random.lognormal(np.log(strength), 5/(strength + 5), 10000) + 10
+a *= False
 
-    plt.hist(vs, bins=100, density=True, alpha=0.6, label=f'Strength {strength}')
+print(a*a)
 
-plt.legend()
-plt.show()
+# for strength in [1, 3, 8, 10]:
+#     vs = 500*np.random.lognormal(np.log(strength), 5/(strength + 5), 10000) + 10
+
+#     plt.hist(vs, bins=100, density=True, alpha=0.6, label=f'Strength {strength}')
+
+# plt.legend()
+# plt.show()
