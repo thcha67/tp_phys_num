@@ -7,8 +7,6 @@ from config import *
 import time
 import json
 
-np.random.seed(3)
-
 players : list[Player] = [Player(0), Player(1)]
 
 score = [0, 0]  #[blue team goals, red team goals]
@@ -66,8 +64,8 @@ while not gameOver:
     # apply friction, 0 = no friction
     ball_velocity.x = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.x
     ball_velocity.y = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.y
-    #if mag(ball_velocity) < BALL_MIN_VELOCITY:
-        #ball, ball_velocity = faceoff(ball)
+    if mag(ball_velocity) < BALL_MIN_VELOCITY:
+        ball, ball_velocity = faceoff(ball)
 
     # Check for collisions with table boundaries
     if abs(ball.pos.x) >= TABLE_LENGTH/2 - BALL_RADIUS:
@@ -168,8 +166,13 @@ while not gameOver:
                 time.sleep(0.5)
         net_number += 1
 
+data = []
+with open('simulation_data.json', 'r') as file:
+    data = json.load(file)
+
+
 # Write the JSON data to a file
-data = {
+data.append({
     "game_score": score,
     "player_0" : {
     "reflexes": players[0].reflexes,
@@ -186,7 +189,7 @@ data = {
     "strategy": players[1].strategy
     },
     "time" : time.strftime("%Y-%m-%d %H:%M:%S")
-}
+})
 
 with open('simulation_data.json', 'w') as json_file:
     json.dump(data, json_file, indent = 4)

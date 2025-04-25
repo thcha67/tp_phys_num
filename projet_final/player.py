@@ -17,6 +17,7 @@ class Player():
         [[0, 1], [1, 2], [1, 3]], # def all the time
         [[0, 1], [0, 1], [0, 3]], # never midfielders ):
     ]
+    transition_zone_amount = 80
 
     eff_tab_width = TABLE_WIDTH-2*SPRING_LENGTH
     width_range = eff_tab_width/2
@@ -52,15 +53,15 @@ class Player():
         ball_section = 0 # intially set to defense
         
         if self.team == 0: # blue team
-            if ball.pos.x >= self.rod_positions[3]: # ball further than attacker rod
+            if ball.pos.x >= self.rod_positions[3] - self.transition_zone_amount: # ball further than attacker rod
                 ball_section = 2
-            elif ball.pos.x >= self.rod_positions[2]: #ball in midfield
+            elif ball.pos.x >= self.rod_positions[2] - self.transition_zone_amount: #ball in midfield
                 ball_section = 1
 
         else: # red team
-            if ball.pos.x <= self.rod_positions[3]: # ball further than attacker rod
+            if ball.pos.x <= self.rod_positions[3] + self.transition_zone_amount: # ball further than attacker rod
                 ball_section = 2
-            elif ball.pos.x <= self.rod_positions[2]: #ball in midfield
+            elif ball.pos.x <= self.rod_positions[2] + self.transition_zone_amount: #ball in midfield
                 ball_section = 1
 
         # print(self.team, ball_section, self.hand_positions)
@@ -172,7 +173,6 @@ class Player():
 
     def is_ball_controlled(self, velocity_magnitude, relative_incoming_angle):
         if velocity_magnitude < 300:
-            print("ball is slow")
             return True # 100% chance to control the ball if its slow enough
         
         velocity_correction = 1 - (velocity_magnitude / BALL_MAX_VELOCITY / 2) # 0.5 for a velocity max and 1 for a velocity min
