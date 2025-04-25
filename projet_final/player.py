@@ -109,8 +109,8 @@ class Player():
                 ball_to_net_center = ball_to_net_center / mag(ball_to_net_center)
                 
                 predicted_hit_y = ball.pos.y + ball_to_net_center.y * (ball.pos.x - rod_pos_x)
-                arrow(pos=ball.pos, axis=ball_to_net_center*100, color=color.red, shaftwidth=2)
-                time.sleep(0.1)
+                # arrow(pos=ball.pos, axis=ball_to_net_center*100, color=color.red, shaftwidth=2)
+                # time.sleep(0.1)
             else:
                 predicted_hit_y = ball.pos.y - rod_pawns[0].pos.y
         else: # ball is coming towrards the rod, estimate where it will hit the rod
@@ -132,13 +132,8 @@ class Player():
                     index_of_pawn = i
                     break
         
-        try:
-            pawn = rod_pawns[index_of_pawn]
-        except:
-            print(self.pawn_y_ranges)
-            print(predicted_hit_y)
-            print(rod_number)
-            exit()
+        pawn = rod_pawns[index_of_pawn]
+    
         delta_y = predicted_hit_y - pawn.pos.y
         displacement = max(-self.reflexes, min(self.reflexes, delta_y))
 
@@ -169,7 +164,7 @@ class Player():
             pawn.pos.y += displacement
 
     def get_velocity(self):
-        return 400*(np.random.lognormal(np.log(self.strength), 5/(self.strength + 5), 1)[0] + 10)
+        return 300*(np.random.lognormal(np.log(self.strength), 5/(self.strength + 5), 1)[0] + 10)
 
     def is_ball_controlled(self, velocity_magnitude, relative_incoming_angle):
         if velocity_magnitude < 300:
@@ -186,11 +181,6 @@ class Player():
     
     def can_pass(self, is_ball_controlled):
         return is_ball_controlled and np.random.rand() < 0.5 # 50% chance to pass or not when the ball is controlled
-        # if velocity_magnitude < 300:
-        #     return np.random.rand() < 0.5 # 50% chance to pass or not if its slow enough
-        
-        # velocity_correction = 1 - (velocity_magnitude / BALL_MAX_VELOCITY / 2)
-        # return np.random.rand() < (self.technique / 10 / 2 * velocity_correction) # technique 10 player with minimal velocity passed 5/10 times
 
     def pawn_ball_exit_displacement(self, rod_pawns, predicted_hit_y):
         displacement = 0

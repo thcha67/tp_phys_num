@@ -36,13 +36,13 @@ ball, ball_velocity = faceoff(ball)
 net_blue = box(pos=vector(-TABLE_LENGTH/2-NET_DEPTH/2, 0, 0.15), size=vector(NET_DEPTH, NET_WIDTH, NET_THICKNESS), color=color.white)
 net_red = box(pos=vector(TABLE_LENGTH/2+NET_DEPTH/2, 0, 0.15), size=vector(NET_DEPTH, NET_WIDTH, NET_THICKNESS), color=color.white)
 
-blue_posts = [
-    sphere(pos=vector(TABLE_LENGTH/2, -NET_WIDTH/2, 0.15), visible=False),
-    sphere(pos=vector(TABLE_LENGTH/2, NET_WIDTH/2, 0.15), visible=False)
-]
 red_posts = [
-    sphere(pos=vector(-TABLE_LENGTH/2, -NET_WIDTH/2, 0.15), visible=False),
-    sphere(pos=vector(-TABLE_LENGTH/2, NET_WIDTH/2, 0.15), visible=False)
+    sphere(pos=vector(TABLE_LENGTH/2, -NET_WIDTH/2, 0.15), visible=False, color=color.red, radius=20),
+    sphere(pos=vector(TABLE_LENGTH/2, NET_WIDTH/2, 0.15), visible=False, color=color.red, radius=20)
+]
+blue_posts = [
+    sphere(pos=vector(-TABLE_LENGTH/2, -NET_WIDTH/2, 1), visible=False, color=color.blue, radius=20),
+    sphere(pos=vector(-TABLE_LENGTH/2, NET_WIDTH/2, 1), visible=False, color=color.blue, radius=20)
 ]
 
 
@@ -97,8 +97,7 @@ while not gameOver:
         player_pawns = pawns[player.team]
         player.move_hands(ball)
 
-        own_posts = blue_posts if player.team == 0 else red_posts
-        opposing_posts = red_posts if player.team == 1 else blue_posts
+        opposing_posts = red_posts if player.team == 0 else blue_posts
 
         #calculate the displacement of each rod
         for i, rod_index in enumerate(player.hand_positions):

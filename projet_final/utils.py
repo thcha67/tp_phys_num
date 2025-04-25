@@ -154,7 +154,7 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
     opponent_pawns = pawns[1 - player.team]
     if closest_rod_to_ball == 3: # attackers rod, aim between the opponent's defenders and gk and towards the net (between the posts)
         pawns_to_avoid = posts + opponent_pawns[0] + opponent_pawns[1] # opponent's posts, goalkeeper and defenders
-        extreme_vectors_x_position = pawns_to_avoid[0].pos.x # goal post position
+        extreme_vectors_x_position = posts[0].pos.x#pawns_to_avoid[0].pos.x # goal post position
         max_vector = vector(extreme_vectors_x_position, NET_WIDTH/2 - BALL_RADIUS, 0.15) - ball.pos
         min_vector = vector(extreme_vectors_x_position, -NET_WIDTH/2 + BALL_RADIUS, 0.15) - ball.pos
 
