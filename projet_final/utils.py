@@ -93,7 +93,7 @@ def faceoff(ball : sphere):
     #ball.pos.x, ball.pos.y = 0, -TABLE_WIDTH/2+20
     #ball_velocity = vector(0,0,0)
     ball.pos.x, ball.pos.y = np.random.uniform(-20, 20), np.random.uniform(-TABLE_WIDTH/3, TABLE_WIDTH/3)
-    ball_velocity = vector(np.random.uniform(-60, 60), np.random.uniform(-60, 60), 0)
+    ball_velocity = vector(np.random.uniform(-20, 20), np.random.uniform(-20, 20), 0)
 
     ball_velocity.x, ball_velocity.y = BALL_INITIAL_VELOCITY_MAGNITUDE*ball_velocity.x, BALL_INITIAL_VELOCITY_MAGNITUDE*ball_velocity.y
     return ball, ball_velocity
