@@ -78,14 +78,14 @@ while not gameOver:
         if -NET_WIDTH/2 + BALL_RADIUS < ball.pos.y < NET_WIDTH/2 - BALL_RADIUS: #its going into the net TODO improve for small DT
             pass
         else:
-            ball_velocity.x *= -1
-            ball_velocity *= 0.5
+            ball_velocity.x *= -1 # reflect the ball
+            ball_velocity /= 2 # attenuate the velocity by 2
             ball.pos.x = np.sign(ball.pos.x) * (TABLE_LENGTH/2 - BALL_RADIUS) # set the ball position to the edge of the table
             most_recent_pawn = None
 
     if abs(ball.pos.y) >= TABLE_WIDTH/2 - BALL_RADIUS:
-        ball_velocity.y *= -1
-        ball_velocity *= 0.5
+        ball_velocity.y *= -1 # reflect the ball
+        ball_velocity /= 2 # attenuate the velocity by 2
         ball.pos.y = np.sign(ball.pos.y) * (TABLE_WIDTH/2 - BALL_RADIUS) # set the ball position to the edge of the table
         most_recent_pawn = None
     
@@ -135,15 +135,14 @@ while not gameOver:
 
                 if is_ball_controlled:
                     if can_pass and closest_rod_to_ball != 0: # goalkeeper cannot pass
-                        print("pass", mag(ball_velocity))
                         ball_velocity = pass_ball(pawn, rod_pawns, new_velocity_magnitude)
                         ball.pos.x = pawn.pos.x
                     else:
-                        print("shoot", mag(ball_velocity))
                         posts = blue_posts if player.team == 0 else red_posts
                         ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity)
                 else:
-                    print("reflection", mag(ball_velocity))
+                    if relative_incoming_angle == np.pi/2:
+                        ball_velocity = diffuse_reflection(ball_velocity)
                     ball_velocity = specular_reflection(ball_velocity, reflection_normal)
 
                 most_recent_pawn = pawn

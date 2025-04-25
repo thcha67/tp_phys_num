@@ -168,6 +168,7 @@ class Player():
 
     def is_ball_controlled(self, velocity_magnitude, relative_incoming_angle):
         if velocity_magnitude < 300:
+            print("ball is slow")
             return True # 100% chance to control the ball if its slow enough
         
         velocity_correction = 1 - (velocity_magnitude / BALL_MAX_VELOCITY / 2) # 0.5 for a velocity max and 1 for a velocity min
