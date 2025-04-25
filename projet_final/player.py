@@ -109,9 +109,9 @@ class Player():
         predicted_hit_y = max(-TABLE_WIDTH/2 + SPRING_LENGTH, min(TABLE_WIDTH/2 - SPRING_LENGTH, predicted_hit_y))
 
         if_list = [[ball_velocity.x, 0, rod_pos_x, ball.pos.x], [0, ball_velocity.x, ball.pos.x, rod_pos_x]][self.team]
-        if (if_list[0] > if_list[1] or if_list[2] > if_list[3]): #ball is behind the rod, OR velocity towards the opposing net
-            if (if_list[0] > if_list[1] and if_list[2] > if_list[3]): #ball is behind the rod, AND the velocity is towards opponent net
-                return self.pawn_ball_exit_displacement(rod_pawns, predicted_hit_y)
+        if (if_list[0] > if_list[1] and if_list[2] > if_list[3]): #velocity is towards opponent net, AND ball is behind the rod
+            return self.pawn_ball_exit_displacement(rod_pawns, predicted_hit_y)
+        elif (if_list[0] > if_list[1] or if_list[2] > if_list[3]): # velocity towards the opposing net, OR ball is behind the rod
             return 0
 
         if predicted_hit_y >= self.width_range:
@@ -137,7 +137,7 @@ class Player():
         if self.is_displacement_allowed(rod_pawns, displacement):
             return displacement
         else:
-            return 0
+            return self.pawn_defense_displacement(rod_pawns, rod_number, ball)
     
     def is_displacement_allowed(self, rod_pawns, displacement):
         max_position = TABLE_WIDTH / 2 - SPRING_LENGTH

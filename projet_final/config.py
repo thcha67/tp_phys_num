@@ -23,6 +23,7 @@ DEFAULT_SIMULATION_CONFIG = {
     "ball_initial_velocity_magnitude": 100,
     "ball_initial_velocity_angle": 0.1,
     "ball_max_velocity": 200,
+    "ball_min_velocity" : 100,
     "ball_friction_coefficient": 0.05
 }
 
@@ -71,6 +72,7 @@ BALL_INITIAL_POSITION = simulation_config["ball_initial_position"]
 BALL_INITIAL_VELOCITY_MAGNITUDE = simulation_config["ball_initial_velocity_magnitude"]
 BALL_INITIAL_VELOCITY_ANGLE = simulation_config["ball_initial_velocity_angle"]
 BALL_MAX_VELOCITY = simulation_config["ball_max_velocity"]
+BALL_MIN_VELOCITY = simulation_config["ball_min_velocity"]
 BALL_FRICTION_COEFFICIENT = simulation_config["ball_friction_coefficient"]
 
 

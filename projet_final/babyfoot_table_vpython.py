@@ -31,8 +31,8 @@ hand_identifiers = generate_hand_identifiers()
 
 # Create the ball at the specified position
 ball = sphere(pos=vector(BALL_INITIAL_POSITION[0], BALL_INITIAL_POSITION[1], 0.15), radius=BALL_RADIUS, color=color.white)
-ball_velocity = vector(BALL_INITIAL_VELOCITY_MAGNITUDE*np.cos(BALL_INITIAL_VELOCITY_ANGLE), BALL_INITIAL_VELOCITY_MAGNITUDE*np.sin(BALL_INITIAL_VELOCITY_ANGLE), 0)
-faceoff(ball, ball_velocity)
+ball_velocity = vector(0, 0, 0)
+ball, ball_velocity = faceoff(ball)
 
 # Create the nets behind each goalkeeper
 net_blue = box(pos=vector(-TABLE_LENGTH/2-NET_DEPTH/2, 0, 0.15), size=vector(NET_DEPTH, NET_WIDTH, NET_THICKNESS), color=color.white)
@@ -67,6 +67,8 @@ while not gameOver:
     # apply friction, 0 = no friction
     ball_velocity.x = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.x
     ball_velocity.y = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.y
+    if mag(ball_velocity) < BALL_MIN_VELOCITY:
+        ball, ball_velocity = faceoff(ball)
 
     # Check for collisions with table boundaries
     if abs(ball.pos.x) >= TABLE_LENGTH/2 - BALL_RADIUS:
@@ -146,12 +148,12 @@ while not gameOver:
             if net_number == 0:
                 gameOver = update_score(1, score, score_label)
                 time.sleep(0.5)
-                faceoff(ball, ball_velocity)
+                ball, ball_velocity = faceoff(ball)
                 time.sleep(0.5)
             else:
                 gameOver = update_score(0, score, score_label)
                 time.sleep(0.5)
-                faceoff(ball, ball_velocity)
+                ball, ball_velocity = faceoff(ball)
                 time.sleep(0.5)
         net_number += 1
 

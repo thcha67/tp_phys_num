@@ -60,9 +60,9 @@ def generate_pawns():
         [[red_pawns[0]], [defender for defender in red_pawns[1:3]], [mid for mid in red_pawns[3:8]], [att for att in red_pawns[8:11]]]
     ], blue_pawns + red_pawns
 
-def faceoff(ball : sphere, ball_velocity : vector):
+def faceoff(ball : sphere):
     ball.pos.x, ball.pos.y = np.random.uniform(-20, 20), np.random.uniform(-TABLE_WIDTH/3, TABLE_WIDTH/3)
-    ball_velocity.x, ball_velocity.y = np.random.uniform(-20, 20), np.random.uniform(-20, 20)
+    ball_velocity = vector(np.random.uniform(-60, 60), np.random.uniform(-60, 60), 0)
 
     while ball_velocity.x == 0 or ball_velocity.y == 0:
         ball_velocity.x, ball_velocity.y = np.random.randint(-60, 60), np.random.randint(-20, 20)
