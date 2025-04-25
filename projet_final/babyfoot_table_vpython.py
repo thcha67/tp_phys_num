@@ -54,6 +54,8 @@ most_recent_pawn = None
 displacement_error = np.random.normal(0, 5)
 gameOver = False
 
+last_player_who_touched_ball = None
+
 while not gameOver:
     rate(TIME_MULTIPLIER/DT) # control the simulation speed
     simulation_time += DT
@@ -111,10 +113,6 @@ while not gameOver:
 
         new_velocity_magnitude = player.get_velocity()
 
-        is_ball_controlled = player.is_ball_controlled(mag(ball_velocity))
-
-        can_pass = player.can_pass(mag(ball_velocity))
-
         rod_pawns = player_pawns[closest_rod_to_ball]
 
         for pawn in rod_pawns: # check for collisions with the closest rod to the ball
@@ -123,27 +121,31 @@ while not gameOver:
             reflection_normal = check_ball_pawn_collision(ball, pawn)
 
             if reflection_normal is not None: # collision detected
+                last_player_who_touched_ball = player.team
+
                 # ball cannot be controlled if the player's hand is not on the rod
                 if closest_rod_to_ball not in player.hand_positions:
                     is_ball_controlled = False
+                
+                else: # check where the ball is coming from
+                    relative_incoming_angle = reflection_normal.diff_angle(vector(1 - 2*player.team, 0, 0)) # pi: from the back, pi/2 on top or bottom, 0 from the front
+                    is_ball_controlled = player.is_ball_controlled(mag(ball_velocity), relative_incoming_angle)
 
-                relative_incoming_angle = reflection_normal.diff_angle(vector(1 - 2*player.team, 0, 0)) # pi: from the back, pi/2 on top or bottom, 0 from the front
+                can_pass = player.can_pass(is_ball_controlled)
 
-                if relative_incoming_angle > np.pi/2: # ball is coming from the back of the pawn (back side or back corners)
-                    is_ball_controlled *= np.random.rand() < 0.25 # divide the probability of controlling the ball by 4
-                elif relative_incoming_angle != 0: # ball is coming from top/bottom or front corners
-                    is_ball_controlled *= np.random.rand() < 0.5 # divide the probability of controlling the ball by 2
-
-                if is_ball_controlled: # specular reflection
+                if is_ball_controlled:
                     if can_pass and closest_rod_to_ball != 0: # goalkeeper cannot pass
+                        print("pass", mag(ball_velocity))
                         ball_velocity = pass_ball(pawn, rod_pawns, new_velocity_magnitude)
                         ball.pos.x = pawn.pos.x
                     else:
+                        print("shoot", mag(ball_velocity))
                         posts = blue_posts if player.team == 0 else red_posts
                         ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity)
                 else:
+                    print("reflection", mag(ball_velocity))
                     ball_velocity = specular_reflection(ball_velocity, reflection_normal)
-                        # if not hands
+
                 most_recent_pawn = pawn
                 displacement_error = np.random.normal(0, 5)
                 break

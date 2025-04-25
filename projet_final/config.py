@@ -25,8 +25,8 @@ DEFAULT_SIMULATION_CONFIG = {
     "ball_initial_position": [500, 0],
     "ball_initial_velocity_magnitude": 100,
     "ball_initial_velocity_angle": 0.1,
-    "ball_max_velocity": 200,
-    "ball_min_velocity" : 100,
+    "ball_max_velocity": 8000,
+    "ball_min_velocity" : 50,
     "ball_friction_coefficient": 0.05
 }
 
