@@ -13,7 +13,9 @@ DEFAULT_TABLE_CONFIG = {
     "net_thickness": 0.1,
     "net_width": 204,
     "net_depth": 40,
-    "ball_radius": 16
+    "ball_radius": 16,
+    "triangle_vert" : 250,
+    "triangle_hori" : 160
 }
 
 DEFAULT_SIMULATION_CONFIG = {
@@ -65,6 +67,8 @@ NET_THICKNESS = table_config["net_thickness"]
 NET_WIDTH = table_config["net_width"]
 NET_DEPTH = table_config["net_depth"]
 BALL_RADIUS = table_config["ball_radius"]
+TRIANGLE_VERT = table_config["triangle_vert"]
+TRIANGLE_HORI = table_config["triangle_hori"]
 
 DT = simulation_config["dt"]
 TIME_MULTIPLIER = simulation_config["time_multiplier"]

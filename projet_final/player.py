@@ -137,7 +137,7 @@ class Player():
         if self.is_displacement_allowed(rod_pawns, displacement):
             return displacement
         else:
-            return self.pawn_defense_displacement(rod_pawns, rod_number, ball)
+            return 0
     
     def is_displacement_allowed(self, rod_pawns, displacement):
         max_position = TABLE_WIDTH / 2 - SPRING_LENGTH
