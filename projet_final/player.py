@@ -97,13 +97,16 @@ class Player():
             
         delta_x = rod_pos_x - ball.pos.x
 
-        if ball_velocity.x == 0: # ball direction is vertical, happens in passes
+        if delta_x == 0: # ball is on the rod, then wait for the pass
             return 0
 
-        predicted_hit_y = delta_x * ball_velocity.y/ball_velocity.x + ball.pos.y
+        if ball_velocity.x == 0: # ball direction is vertical, happens in passes, then follow the ball
+            predicted_hit_y = ball.pos.y - rod_pawns[0].pos.y
+        else: # ball is coming towrards the rod, estimate where it will hit the rod
+            predicted_hit_y = delta_x * ball_velocity.y/ball_velocity.x + ball.pos.y
 
         # a noise is added
-        predicted_hit_y += + displacement_error
+        #predicted_hit_y += + displacement_error
 
         # bind predicted_hit_y to the table limits
         predicted_hit_y = max(-TABLE_WIDTH/2 + SPRING_LENGTH, min(TABLE_WIDTH/2 - SPRING_LENGTH, predicted_hit_y))
@@ -137,7 +140,7 @@ class Player():
         if self.is_displacement_allowed(rod_pawns, displacement):
             return displacement
         else:
-            return self.pawn_defense_displacement(rod_pawns, rod_number, ball)
+            return 0
     
     def is_displacement_allowed(self, rod_pawns, displacement):
         max_position = TABLE_WIDTH / 2 - SPRING_LENGTH
@@ -163,13 +166,26 @@ class Player():
     def get_velocity(self):
         return 400*(np.random.lognormal(np.log(self.strength), 5/(self.strength + 5), 1)[0] + 10)
 
-    def is_ball_controlled(self, velocity_magnitude):
+    def is_ball_controlled(self, velocity_magnitude, relative_incoming_angle):
+        if velocity_magnitude < 300:
+            return True # 100% chance to control the ball if its slow enough
+        
         velocity_correction = 1 - (velocity_magnitude / BALL_MAX_VELOCITY / 2) # 0.5 for a velocity max and 1 for a velocity min
-        return np.random.rand() < (self.technique / 10 * velocity_correction) # technique 10 player with minimal velocity controlled 10/10 times
+        
+        is_ball_controlled = np.random.rand() < (self.technique / 10 * velocity_correction) 
+        
+        if relative_incoming_angle > np.pi/2: # ball is coming from the back of the pawn (back side or back corners)
+            is_ball_controlled *= np.random.rand() < 0.25 # divide the probability of controlling the ball by 4
+
+        return is_ball_controlled
     
-    def can_pass(self, velocity_magnitude):
-        velocity_correction = 1 - (velocity_magnitude / BALL_MAX_VELOCITY / 2)
-        return np.random.rand() < (self.technique / 10 / 2 * velocity_correction) # technique 10 player with minimal velocity passed 5/10 times
+    def can_pass(self, is_ball_controlled):
+        return is_ball_controlled and np.random.rand() < 0.5 # 50% chance to pass or not when the ball is controlled
+        # if velocity_magnitude < 300:
+        #     return np.random.rand() < 0.5 # 50% chance to pass or not if its slow enough
+        
+        # velocity_correction = 1 - (velocity_magnitude / BALL_MAX_VELOCITY / 2)
+        # return np.random.rand() < (self.technique / 10 / 2 * velocity_correction) # technique 10 player with minimal velocity passed 5/10 times
 
     def pawn_ball_exit_displacement(self, rod_pawns, predicted_hit_y):
         displacement = 0
