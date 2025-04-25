@@ -123,12 +123,14 @@ while not gameOver:
             if reflection_normal is not None: # collision detected
                 last_player_who_touched_ball = player.team
 
+
+                relative_incoming_angle = reflection_normal.diff_angle(vector(1 - 2*player.team, 0, 0)) # pi: from the back, pi/2 on top or bottom, 0 from the front
+                
                 # ball cannot be controlled if the player's hand is not on the rod
                 if closest_rod_to_ball not in player.hand_positions:
                     is_ball_controlled = False
                 
                 else: # check where the ball is coming from
-                    relative_incoming_angle = reflection_normal.diff_angle(vector(1 - 2*player.team, 0, 0)) # pi: from the back, pi/2 on top or bottom, 0 from the front
                     is_ball_controlled = player.is_ball_controlled(mag(ball_velocity), relative_incoming_angle)
 
                 can_pass = player.can_pass(is_ball_controlled)
