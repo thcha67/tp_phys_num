@@ -2,13 +2,13 @@ from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, 
 import numpy as np
 from player import Player
 from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff, is_ball_in_net, check_ball_pawn_collision, specular_reflection, controlled_shot, change_hand_identifier_color, update_score
-from utils import pass_ball
+from utils import pass_ball, generate_triangles, check_if_ball_is_on_triangle, modify_velocity_on_triangle
 from config import *
 
 import time
 import json
 
-np.random.seed(0)
+np.random.seed(3)
 
 players : list[Player] = [Player(0), Player(1)]
 
@@ -28,6 +28,7 @@ time_label = label(pos=time_box.pos, text=f"{simulation_time}s", xoffset=0, yoff
 rods = generate_rods()
 pawns, individual_pawns = generate_pawns()
 hand_identifiers = generate_hand_identifiers()
+triangles = generate_triangles()
 
 # Create the ball at the specified position
 ball = sphere(pos=vector(BALL_INITIAL_POSITION[0], BALL_INITIAL_POSITION[1], 0.15), radius=BALL_RADIUS, color=color.white)
@@ -87,6 +88,11 @@ while not gameOver:
         ball_velocity *= 0.5
         ball.pos.y = np.sign(ball.pos.y) * (TABLE_WIDTH/2 - BALL_RADIUS) # set the ball position to the edge of the table
         most_recent_pawn = None
+    
+    # Check if the ball if on the triangles
+    for tri in triangles:
+        if check_if_ball_is_on_triangle(ball, tri):
+            modify_velocity_on_triangle(ball, ball_velocity)
     
     #check if players changes hand position, and move the rods. Also check for collisions with the pawns
     for player in players:

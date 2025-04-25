@@ -1,5 +1,5 @@
 from config import *
-from vpython import box, vector, color, label, sphere, mag, arrow
+from vpython import box, vector, color, label, sphere, mag, arrow, triangle, quad, vertex
 import numpy as np
 from player import Player
 import time
@@ -15,7 +15,7 @@ def update_score(teamNumber : int, score, score_label):
 def generate_rods():    
     return [
     box(
-        pos=vector(rod_position, 0, 0.15), 
+        pos=vector(rod_position, 0, 0.25), 
         size=vector(ROD_THICKNESS, TABLE_WIDTH, 0.1), 
         color=color.gray(0.5)
     )
@@ -60,15 +60,34 @@ def generate_pawns():
         [[red_pawns[0]], [defender for defender in red_pawns[1:3]], [mid for mid in red_pawns[3:8]], [att for att in red_pawns[8:11]]]
     ], blue_pawns + red_pawns
 
+def generate_triangles():
+
+    tri_height = 0.15
+    
+    pos_vec_1 = vector(-TABLE_LENGTH/2, -TABLE_WIDTH/2, 0)
+    v0, v1, v2 = vertex(pos=vector(0, 0, tri_height) + pos_vec_1), vertex(pos=vector(TRIANGLE_HORI, 0, tri_height) + pos_vec_1), vertex(pos=vector(0, TRIANGLE_VERT, tri_height) + pos_vec_1)
+    tri_1 = triangle(v0=v0, v1=v1, v2=v2)
+
+    pos_vec_2 = vector(TABLE_LENGTH/2, -TABLE_WIDTH/2, 0)
+    v0, v1, v2 = vertex(pos=vector(0, 0, tri_height) + pos_vec_2), vertex(pos=vector(-TRIANGLE_HORI, 0, tri_height) + pos_vec_2), vertex(pos=vector(0, TRIANGLE_VERT, tri_height) + pos_vec_2)
+    tri_2 = triangle(v0=v0, v1=v1, v2=v2)
+
+    pos_vec_3 = vector(TABLE_LENGTH/2, TABLE_WIDTH/2, 0)
+    v0, v1, v2 = vertex(pos=vector(0, 0, tri_height) + pos_vec_3), vertex(pos=vector(-TRIANGLE_HORI, 0, tri_height) + pos_vec_3), vertex(pos=vector(0, -TRIANGLE_VERT, tri_height) + pos_vec_3)
+    tri_3 = triangle(v0=v0, v1=v1, v2=v2)
+
+    pos_vec_4 = vector(-TABLE_LENGTH/2, TABLE_WIDTH/2, 0)
+    v0, v1, v2 = vertex(pos=vector(0, 0, tri_height) + pos_vec_4), vertex(pos=vector(TRIANGLE_HORI, 0, tri_height) + pos_vec_4), vertex(pos=vector(0, -TRIANGLE_VERT, tri_height) + pos_vec_4)
+    tri_4 = triangle(v0=v0, v1=v1, v2=v2)
+    
+    return [tri_1, tri_2, tri_3, tri_4]
+
+
 def faceoff(ball : sphere):
     ball.pos.x, ball.pos.y = np.random.uniform(-20, 20), np.random.uniform(-TABLE_WIDTH/3, TABLE_WIDTH/3)
     ball_velocity = vector(np.random.uniform(-60, 60), np.random.uniform(-60, 60), 0)
 
-    while ball_velocity.x == 0 or ball_velocity.y == 0:
-        ball_velocity.x, ball_velocity.y = np.random.randint(-60, 60), np.random.randint(-20, 20)
-
-    mag_factor = BALL_INITIAL_VELOCITY_MAGNITUDE/mag(ball_velocity)
-    ball_velocity.x, ball_velocity.y = mag_factor*ball_velocity.x, mag_factor*ball_velocity.y
+    ball_velocity.x, ball_velocity.y = BALL_INITIAL_VELOCITY_MAGNITUDE*ball_velocity.x, BALL_INITIAL_VELOCITY_MAGNITUDE*ball_velocity.y
     return ball, ball_velocity
 
 def is_ball_in_net(ball : sphere, net : box):
@@ -185,3 +204,24 @@ def pass_ball(pawn, rod_pawns, new_velocity_magnitude):
     # Apply redirection
     ball_velocity = direction * new_velocity_magnitude / 10 # 10% of the velocity for passess
     return ball_velocity
+
+def check_if_ball_is_on_triangle(ball : sphere, triangle : triangle):
+    m = TRIANGLE_VERT/TRIANGLE_HORI
+    b = -990.625 #hard coded ark degeu
+    if ball.pos.y < abs(m*ball.pos.x) + b or ball.pos.y > -abs(m*ball.pos.x) - b:
+        return True
+    
+def modify_velocity_on_triangle(ball : sphere, ball_velocity : vector):
+    triangle_accel_x, triangle_accel_y = 113.6, 72.8            
+    if ball.pos.x > 0 and ball.pos.y > 0: #upper right
+        ball_velocity.x += -triangle_accel_x / DT**-1
+        ball_velocity.y += -triangle_accel_y / DT**-1
+    elif ball.pos.x > 0 and ball.pos.y < 0: #lower right
+        ball_velocity.x += -triangle_accel_x / DT**-1
+        ball_velocity.y += triangle_accel_y/ DT**-1
+    elif ball.pos.x < 0 and ball.pos.y < 0: #lower left
+        ball_velocity.x += triangle_accel_x / DT**-1
+        ball_velocity.y += triangle_accel_y / DT**-1
+    elif ball.pos.x < 0 and ball.pos.y > 0: #upper left
+        ball_velocity.x += triangle_accel_x / DT**-1
+        ball_velocity.y += -triangle_accel_y / DT**-1
