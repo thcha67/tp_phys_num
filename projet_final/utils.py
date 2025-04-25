@@ -145,6 +145,11 @@ def specular_reflection(ball_velocity, reflection_normal):
     ball_velocity.y -= 2 * dot * reflection_normal.y
     return ball_velocity*0.8 # 10% speed loss on collision
 
+def diffuse_reflection(ball_velocity):
+    new_angle = np.random.uniform(0, 2 * np.pi) # random angle between 0 and 2pi
+    new_velocity = vector(np.cos(new_angle), np.sin(new_angle), 0) * mag(ball_velocity) # keep the same speed
+    return new_velocity*0.8
+
 def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity):
     opponent_pawns = pawns[1 - player.team]
     if closest_rod_to_ball == 3: # attackers rod, aim between the opponent's defenders and gk and towards the net (between the posts)
@@ -212,6 +217,7 @@ def pass_ball(pawn, rod_pawns, new_velocity_magnitude):
     # Apply redirection
     ball_velocity = direction * new_velocity_magnitude / 10 # 10% of the velocity for passess
     return ball_velocity
+
 
 def check_if_ball_is_on_triangle(ball : sphere, triangle : triangle):
     m = TRIANGLE_VERT/TRIANGLE_HORI

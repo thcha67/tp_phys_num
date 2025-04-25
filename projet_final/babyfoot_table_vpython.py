@@ -141,7 +141,7 @@ while not gameOver:
                         posts = blue_posts if player.team == 0 else red_posts
                         ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity)
                 else:
-                    if relative_incoming_angle == np.pi/2:
+                    if relative_incoming_angle == np.pi/2: # ball is coming from the top or bottom of the pawn (from a pass)
                         ball_velocity = diffuse_reflection(ball_velocity)
                     ball_velocity = specular_reflection(ball_velocity, reflection_normal)
 
