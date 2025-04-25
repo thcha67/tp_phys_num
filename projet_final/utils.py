@@ -79,11 +79,19 @@ def generate_triangles():
     pos_vec_4 = vector(-TABLE_LENGTH/2, TABLE_WIDTH/2, 0)
     v0, v1, v2 = vertex(pos=vector(0, 0, tri_height) + pos_vec_4), vertex(pos=vector(TRIANGLE_HORI, 0, tri_height) + pos_vec_4), vertex(pos=vector(0, -TRIANGLE_VERT, tri_height) + pos_vec_4)
     tri_4 = triangle(v0=v0, v1=v1, v2=v2)
-    
+
     return [tri_1, tri_2, tri_3, tri_4]
 
+def generate_borders():
+    border_height = 0.15
+    upper_border = box(pos=vector(0, TABLE_WIDTH/2 - BORDER_WIDTH/2, border_height), size=vector(TABLE_LENGTH - 2*TRIANGLE_HORI + 50, BORDER_WIDTH, border_height), color=color.gray(1))
+    lower_border = box(pos=vector(0, -TABLE_WIDTH/2 + BORDER_WIDTH/2, border_height), size=vector(TABLE_LENGTH - 2*TRIANGLE_HORI + 50, BORDER_WIDTH, border_height), color=color.gray(1))
+
+    return [upper_border, lower_border]
 
 def faceoff(ball : sphere):
+    #ball.pos.x, ball.pos.y = 0, -TABLE_WIDTH/2+20
+    #ball_velocity = vector(0,0,0)
     ball.pos.x, ball.pos.y = np.random.uniform(-20, 20), np.random.uniform(-TABLE_WIDTH/3, TABLE_WIDTH/3)
     ball_velocity = vector(np.random.uniform(-60, 60), np.random.uniform(-60, 60), 0)
 
@@ -225,3 +233,14 @@ def modify_velocity_on_triangle(ball : sphere, ball_velocity : vector):
     elif ball.pos.x < 0 and ball.pos.y > 0: #upper left
         ball_velocity.x += triangle_accel_x / DT**-1
         ball_velocity.y += -triangle_accel_y / DT**-1
+
+def check_if_ball_is_on_border(ball : sphere, border : box):
+    if abs(ball.pos.y ) + BALL_RADIUS > abs(border.pos.y) - BORDER_WIDTH/2:
+        return True
+    
+def modify_velocity_on_border(ball : sphere, ball_velocity : vector):
+    accel_y = 72.8
+    if ball.pos.y > 0:
+        ball_velocity.y += -accel_y / DT**-1
+    else:
+        ball_velocity.y += accel_y / DT**-1

@@ -1,8 +1,7 @@
 from vpython import canvas, box, sphere, vector, color, rate, mag, text, arrow, label
 import numpy as np
 from player import Player
-from utils import generate_rods, generate_pawns, generate_hand_identifiers, faceoff, is_ball_in_net, check_ball_pawn_collision, specular_reflection, controlled_shot, change_hand_identifier_color, update_score
-from utils import pass_ball, generate_triangles, check_if_ball_is_on_triangle, modify_velocity_on_triangle
+from utils import *
 from config import *
 
 import time
@@ -28,7 +27,7 @@ time_label = label(pos=time_box.pos, text=f"{simulation_time}s", xoffset=0, yoff
 rods = generate_rods()
 pawns, individual_pawns = generate_pawns()
 hand_identifiers = generate_hand_identifiers()
-triangles = generate_triangles()
+triangles, borders = generate_triangles(), generate_borders()
 
 # Create the ball at the specified position
 ball = sphere(pos=vector(BALL_INITIAL_POSITION[0], BALL_INITIAL_POSITION[1], 0.15), radius=BALL_RADIUS, color=color.white)
@@ -51,9 +50,6 @@ red_posts = [
 
 maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]**2) #maximal distance between the ball and the player to be considered as a collision
 
-
-a = []
-
 most_recent_pawn = None
 displacement_error = np.random.normal(0, 5)
 gameOver = False
@@ -68,8 +64,8 @@ while not gameOver:
     # apply friction, 0 = no friction
     ball_velocity.x = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.x
     ball_velocity.y = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.y
-    if mag(ball_velocity) < BALL_MIN_VELOCITY:
-        ball, ball_velocity = faceoff(ball)
+    #if mag(ball_velocity) < BALL_MIN_VELOCITY:
+        #ball, ball_velocity = faceoff(ball)
 
     # Check for collisions with table boundaries
     if abs(ball.pos.x) >= TABLE_LENGTH/2 - BALL_RADIUS:
@@ -91,6 +87,10 @@ while not gameOver:
     for tri in triangles:
         if check_if_ball_is_on_triangle(ball, tri):
             modify_velocity_on_triangle(ball, ball_velocity)
+    
+    for border in borders:
+        if check_if_ball_is_on_border(ball, border):
+            modify_velocity_on_border(ball, ball_velocity)
     
     #check if players changes hand position, and move the rods. Also check for collisions with the pawns
     for player in players:
