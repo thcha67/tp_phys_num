@@ -1,4 +1,4 @@
-from vpython import sphere, vector, box, color
+from vpython import sphere, vector, box, color, arrow, mag
 from config import *
 import time
 import numpy as np
@@ -38,7 +38,7 @@ class Player():
         with open(f"player{self.team}.json", "r") as f:
             player_config = json.load(f)
 
-        reflex_mutliplier = 25 # magic number to give the possible displacement per DT per reflexes stat point
+        reflex_mutliplier = 25*10 # magic number to give the possible displacement per DT per reflexes stat point
         transition_multiplier = 450 #magic number to give the amount of time between transitions per DT per transition stat point
 
         self.reflexes = player_config["reflexes"]*DT*reflex_mutliplier # 0 to 10
@@ -77,7 +77,7 @@ class Player():
 
         return hand_pos_has_changed
     
-    def calculate_rod_displacement(self, ball : sphere, ball_velocity : vector, pawns: list[list[box]], rod_number: int, hand_number : int, displacement_error):
+    def calculate_rod_displacement(self, ball : sphere, ball_velocity : vector, pawns: list[list[box]], rod_number: int, hand_number : int, displacement_error, posts):
         
         if self.transition_cooldown[hand_number] > 0:
             self.transition_cooldown[hand_number] -= 1
@@ -101,7 +101,17 @@ class Player():
             return 0
 
         if ball_velocity.x == 0: # ball direction is vertical, happens in passes, then follow the ball
-            predicted_hit_y = ball.pos.y - rod_pawns[0].pos.y
+            if rod_number == 1: # defender does not simply follow the ball, he postions to intercept a shot to the center of the net
+                net_center = (posts[0].pos + posts[1].pos) / 2
+                ball_to_net_center = net_center - ball.pos
+                # normalize the vector to get the direction
+                ball_to_net_center = ball_to_net_center / mag(ball_to_net_center)
+                
+                predicted_hit_y = ball.pos.y + ball_to_net_center.y * (ball.pos.x - rod_pos_x)
+                arrow(pos=ball.pos, axis=ball_to_net_center*100, color=color.red, shaftwidth=2)
+                time.sleep(0.1)
+            else:
+                predicted_hit_y = ball.pos.y - rod_pawns[0].pos.y
         else: # ball is coming towrards the rod, estimate where it will hit the rod
             predicted_hit_y = delta_x * ball_velocity.y/ball_velocity.x + ball.pos.y
 
@@ -110,12 +120,6 @@ class Player():
 
         # bind predicted_hit_y to the table limits
         predicted_hit_y = max(-TABLE_WIDTH/2 + SPRING_LENGTH, min(TABLE_WIDTH/2 - SPRING_LENGTH, predicted_hit_y))
-
-        if_list = [[ball_velocity.x, 0, rod_pos_x, ball.pos.x], [0, ball_velocity.x, ball.pos.x, rod_pos_x]][self.team]
-        if (if_list[0] > if_list[1] and if_list[2] > if_list[3]): #velocity is towards opponent net, AND ball is behind the rod
-            return self.pawn_ball_exit_displacement(rod_pawns, predicted_hit_y)
-        elif (if_list[0] > if_list[1] or if_list[2] > if_list[3]): # velocity towards the opposing net, OR ball is behind the rod
-            return 0
 
         if predicted_hit_y >= self.width_range:
             index_of_pawn = len(rod_pawns) - 1

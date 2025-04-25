@@ -99,9 +99,12 @@ while not gameOver:
         player_pawns = pawns[player.team]
         player.move_hands(ball)
 
+        own_posts = blue_posts if player.team == 0 else red_posts
+        opposing_posts = red_posts if player.team == 1 else blue_posts
+
         #calculate the displacement of each rod
         for i, rod_index in enumerate(player.hand_positions):
-            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_index, i, displacement_error)
+            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_index, i, displacement_error, opposing_posts)
             player.move_rod(rod_index, displacement, player_pawns)
 
         #change the color of the hand identifiers
@@ -125,7 +128,7 @@ while not gameOver:
 
 
                 relative_incoming_angle = reflection_normal.diff_angle(vector(1 - 2*player.team, 0, 0)) # pi: from the back, pi/2 on top or bottom, 0 from the front
-                
+
                 # ball cannot be controlled if the player's hand is not on the rod
                 if closest_rod_to_ball not in player.hand_positions:
                     is_ball_controlled = False
@@ -140,8 +143,7 @@ while not gameOver:
                         ball_velocity = pass_ball(pawn, rod_pawns, new_velocity_magnitude)
                         ball.pos.x = pawn.pos.x
                     else:
-                        posts = blue_posts if player.team == 0 else red_posts
-                        ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity)
+                        ball_velocity = controlled_shot(closest_rod_to_ball, ball, pawns, player, opposing_posts, new_velocity_magnitude, ball_velocity)
                 else:
                     if relative_incoming_angle == np.pi/2: # ball is coming from the top or bottom of the pawn (from a pass)
                         ball_velocity = diffuse_reflection(ball_velocity)
