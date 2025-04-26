@@ -59,8 +59,7 @@ while not gameOver:
     ball.pos += ball_velocity * DT
 
     # apply friction, 0 = no friction
-    ball_velocity.x = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.x
-    ball_velocity.y = (1 - BALL_FRICTION_COEFFICIENT*DT) * ball_velocity.y
+    apply_air_friction(ball_velocity)
     if mag(ball_velocity) < BALL_MIN_VELOCITY:
         ball, ball_velocity = faceoff(ball)
 

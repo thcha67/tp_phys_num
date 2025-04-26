@@ -202,12 +202,25 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
             best_min_dist = min_dist
             best_direction = direction
 
+    # center a distribution on the best direction, the std dev depends on the player's technique
+    min_angle = np.arctan2(min_vector.y, min_vector.x)
+    max_angle = np.arctan2(max_vector.y, max_vector.x)
+    half_angle_range = abs(max_angle - min_angle)/2
+    best_angle = np.arctan2(best_direction.y, best_direction.x)
+
+    # new angle std from 0.1 (technique 10) to 1 (technique 0)
+    new_angle_std_dev = (-0.09*player.technique + 1) * half_angle_range
+    new_angle = np.random.normal(best_angle, new_angle_std_dev)
+
+    new_direction = vector(np.cos(new_angle), np.sin(new_angle), 0)
+
     # for direction in directions:
     #     arrow(pos=ball.pos, axis=direction*100, color=color.red, shaftwidth=0.5)
-    # arrow(pos=ball.pos, axis=best_direction*200, color=color.green, shaftwidth=1)
+    # arrow(pos=ball.pos, axis=best_direction*200, color=color.blue, shaftwidth=1)
+    # arrow(pos=ball.pos, axis=new_direction*200, color=color.purple, shaftwidth=1)
     # time.sleep(1)
     # Apply redirection
-    ball_velocity = best_direction * new_velocity_magnitude
+    ball_velocity = new_direction * new_velocity_magnitude
     return ball_velocity
 
 def pass_ball(pawn, rod_pawns, new_velocity_magnitude):
@@ -267,3 +280,10 @@ def change_hand_identifier_color(hand_idx : int, player : Player, hand_iden : bo
             hand_iden.color = player.color
     else:
         hand_iden.color = color.gray(0.5)
+
+def apply_air_friction(ball_velocity : vector):
+    """Apply air friction to the ball velocity."""
+    speed = mag(ball_velocity)
+    accel = -3*speed**2 / (16*BALL_RADIUS)
+    new_speed = speed + accel*DT
+    return ball_velocity * (new_speed/speed) if new_speed > 0 else 0
