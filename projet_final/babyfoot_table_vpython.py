@@ -101,13 +101,12 @@ while not gameOver:
 
         #calculate the displacement of each rod
         for i, rod_index in enumerate(player.hand_positions):
-            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_index, i, displacement_error, opposing_posts)
+            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_index, displacement_error, opposing_posts)
             player.move_rod(rod_index, displacement, player_pawns)
 
         #change the color of the hand identifiers
-        transition_idx = 0
         for i, hand_iden in enumerate(hand_identifiers[player.team*4 : (player.team+1) * 4]):
-            change_hand_identifier_color(transition_idx, i, player, hand_iden)
+            change_hand_identifier_color(i, player, hand_iden)
 
         closest_rod_to_ball = np.argmin(abs(player.rod_positions - ball.pos.x))
 

@@ -198,11 +198,9 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
     ball_velocity = best_direction * new_velocity_magnitude
     return ball_velocity
 
-def change_hand_identifier_color(transition_idx : int, hand_idx : int, player : Player, hand_iden : box):
+def change_hand_identifier_color(hand_idx : int, player : Player, hand_iden : box):
     if hand_idx in player.hand_positions:
-        if player.transition_cooldown[transition_idx] == 0:
             hand_iden.color = player.color
-        transition_idx += 1
     else:
         hand_iden.color = color.gray(0.5)
 
@@ -250,3 +248,9 @@ def modify_velocity_on_border(ball : sphere, ball_velocity : vector):
         ball_velocity.y += -accel_y / DT**-1
     else:
         ball_velocity.y += accel_y / DT**-1
+
+def is_hand_available(hand_number, transition_cooldowns):
+    if transition_cooldowns[hand_number] <= 0:
+        return True
+    else:
+        return False
