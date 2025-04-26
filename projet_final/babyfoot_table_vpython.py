@@ -173,20 +173,6 @@ with open('simulation_data.json', 'r') as file:
 # Write the JSON data to a file
 data.append({
     "game_score": score,
-    "player_0" : {
-    "reflexes": players[0].reflexes,
-    "transition_speed": players[0].transition_time, 
-    "strength": players[0].strength, 
-    "technique": players[0].technique, 
-    "strategy": players[0].strategy
-    },
-    "player_1" : {
-    "reflexes": players[1].reflexes,
-    "transition_speed": players[1].transition_time, 
-    "strength": players[1].strength, 
-    "technique": players[1].technique, 
-    "strategy": players[1].strategy
-    },
     "time" : time.strftime("%Y-%m-%d %H:%M:%S")
 })
 

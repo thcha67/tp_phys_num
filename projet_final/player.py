@@ -40,10 +40,9 @@ class Player():
             player_config = json.load(f)
 
         reflex_mutliplier = 25*10 # magic number to give the possible displacement per DT per reflexes stat point
-        transition_multiplier = 450 #magic number to give the amount of time between transitions per DT per transition stat point
 
         self.reflexes = player_config["reflexes"]*DT*reflex_mutliplier # 0 to 10
-        self.transition_time = player_config["transition_speed"]*DT*transition_multiplier # 0 to 10
+        self.transition_speed = player_config["transition_speed"]# 0 to 10
         self.strength = player_config["strength"] # 0 to 10
         self.technique = player_config["technique"] # 0 to 10
         self.strategy = player_config["strategy"] # 0 = gk all time, 1 = opportunistic attack, 2 = def all time, 3 = never midfield
@@ -64,15 +63,15 @@ class Player():
             elif ball.pos.x <= self.rod_positions[2] + self.transition_zone_amount: #ball in midfield
                 ball_section = 1
 
-        # print(self.team, ball_section, self.hand_positions)
-
         new_hand_positions = self.strategy_to_hand_positions[self.strategy][ball_section]
 
         hand_pos_has_changed = new_hand_positions != self.hand_positions
         if hand_pos_has_changed:
             for i in range(2):
                 if self.hand_positions[i] != new_hand_positions[i]:
-                    self.transition_cooldown[i] = round(self.transition_time)
+                    new_transition_time = np.random.normal(1-self.transition_speed/20, 0.1)
+                    print(new_transition_time)
+                    self.transition_cooldown[i] = new_transition_time
             
         self.hand_positions = new_hand_positions
 
@@ -81,7 +80,7 @@ class Player():
     def calculate_rod_displacement(self, ball : sphere, ball_velocity : vector, pawns: list[list[box]], rod_number: int, hand_number : int, displacement_error, posts):
         
         if self.transition_cooldown[hand_number] > 0:
-            self.transition_cooldown[hand_number] -= 1
+            self.transition_cooldown[hand_number] -= DT
             return 0
         
         rod_pos_x = self.rod_positions[rod_number]
