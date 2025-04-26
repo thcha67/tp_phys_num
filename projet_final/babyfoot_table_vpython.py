@@ -70,13 +70,13 @@ while not gameOver:
             pass
         else:
             ball_velocity.x *= -1 # reflect the ball
-            ball_velocity /= 2 # attenuate the velocity by 2
+            ball_velocity = inelastic_collision(ball_velocity, "table_boundary_x")
             ball.pos.x = np.sign(ball.pos.x) * (TABLE_LENGTH/2 - BALL_RADIUS) # set the ball position to the edge of the table
             most_recent_pawn = None
 
     if abs(ball.pos.y) >= TABLE_WIDTH/2 - BALL_RADIUS:
         ball_velocity.y *= -1 # reflect the ball
-        ball_velocity /= 2 # attenuate the velocity by 2
+        ball_velocity = inelastic_collision(ball_velocity, "table_boundary_y")
         ball.pos.y = np.sign(ball.pos.y) * (TABLE_WIDTH/2 - BALL_RADIUS) # set the ball position to the edge of the table
         most_recent_pawn = None
     
@@ -169,6 +169,7 @@ with open('simulation_data.json', 'r') as file:
 # Write the JSON data to a file
 data.append({
     "game_score": score,
+    "simulation_duration" : simulation_time,
     "time" : time.strftime("%Y-%m-%d %H:%M:%S")
 })
 

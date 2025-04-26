@@ -107,6 +107,18 @@ def is_ball_in_net(ball : sphere, net : box):
             return True
     return False
 
+def inelastic_collision(ball_velocity : vector , collision_object : str):
+    velocity_factor = 0
+    if mag(ball_velocity) > 1000:
+        velocity_factor = min(np.sqrt(mag(ball_velocity)) / 1000, 2)
+    if collision_object == "table_boundary_y":
+        division_amount = max(1 + np.random.normal(velocity_factor, 0.3), 1.1)
+    elif collision_object == "table_boundary_x":
+        division_amount = max(1 + np.random.normal(velocity_factor*1.5, 0.3), 1.1)
+    elif collision_object == "pawn_specular" or collision_object == "pawn_diffuse":
+        division_amount  = max(1 + np.random.normal(velocity_factor, 0.5), 1.1)
+    ball_velocity /= division_amount
+    return ball_velocity
 
 def check_ball_pawn_collision(ball, pawn):
     # Relative position
@@ -143,12 +155,12 @@ def specular_reflection(ball_velocity, reflection_normal):
     # Reflect the ball velocity using the reflection normal
     ball_velocity.x -= 2 * dot * reflection_normal.x
     ball_velocity.y -= 2 * dot * reflection_normal.y
-    return ball_velocity*0.8 # 10% speed loss on collision
+    return inelastic_collision(ball_velocity, "pawn_specular")
 
 def diffuse_reflection(ball_velocity):
     new_angle = np.random.uniform(0, 2 * np.pi) # random angle between 0 and 2pi
     new_velocity = vector(np.cos(new_angle), np.sin(new_angle), 0) * mag(ball_velocity) # keep the same speed
-    return new_velocity*0.8
+    return inelastic_collision(new_velocity, "pawn_diffuse")
 
 def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocity_magnitude, ball_velocity):
     opponent_pawns = pawns[1 - player.team]
