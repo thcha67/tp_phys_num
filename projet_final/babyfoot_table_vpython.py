@@ -142,7 +142,7 @@ while not gameOver:
                     ball_velocity = specular_reflection(ball_velocity, reflection_normal)
 
                 most_recent_pawn = pawn
-                displacement_error = np.random.normal(0, 5)
+                displacement_error = np.random.normal(0, -1.6*player.reflexes + 20)
                 break
 
     net_number = 0
