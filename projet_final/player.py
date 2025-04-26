@@ -115,7 +115,7 @@ class Player():
             predicted_hit_y = delta_x * ball_velocity.y/ball_velocity.x + ball.pos.y
 
         # a noise is added
-        #predicted_hit_y += + displacement_error
+        predicted_hit_y += displacement_error
 
         # bind predicted_hit_y to the table limits
         predicted_hit_y = max(-TABLE_WIDTH/2 + SPRING_LENGTH, min(TABLE_WIDTH/2 - SPRING_LENGTH, predicted_hit_y))

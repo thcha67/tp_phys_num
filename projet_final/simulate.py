@@ -3,7 +3,7 @@ import time
 from config import *
 import subprocess
 
-AMOUNT_OF_GAMES_TO_SIMULATE = 3
+AMOUNT_OF_GAMES_TO_SIMULATE = 5
 
 data = []
 
