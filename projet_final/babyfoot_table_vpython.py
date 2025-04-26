@@ -7,6 +7,8 @@ from config import *
 import time
 import json
 
+np.random.seed(5)
+
 players : list[Player] = [Player(0), Player(1)]
 
 score = [0, 0]  #[blue team goals, red team goals]

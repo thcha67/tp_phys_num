@@ -108,16 +108,13 @@ def is_ball_in_net(ball : sphere, net : box):
     return False
 
 def inelastic_collision(ball_velocity : vector , collision_object : str):
-    velocity_factor = 0
-    if mag(ball_velocity) > 1000:
-        velocity_factor = min(np.sqrt(mag(ball_velocity)) / 1000, 2)
-    if collision_object == "table_boundary_y":
-        division_amount = max(1 + np.random.normal(velocity_factor, 0.3), 1.1)
-    elif collision_object == "table_boundary_x":
-        division_amount = max(1 + np.random.normal(velocity_factor*1.5, 0.3), 1.1)
-    elif collision_object == "pawn_specular" or collision_object == "pawn_diffuse":
-        division_amount  = max(1 + np.random.normal(velocity_factor, 0.5), 1.1)
-    ball_velocity /= division_amount
+    if collision_object == "table_boundary_x":
+        velocity_factor = min(np.random.normal(0.6, 0.2), 0.9)
+    elif collision_object == "table_boundary_y":
+        velocity_factor  = min(np.random.normal(0.8, 0.1), 0.9)
+    else: #collision with pawns
+        velocity_factor  = min(np.random.normal(0.8, 0.3), 0.9)
+    ball_velocity *= velocity_factor
     return ball_velocity
 
 def check_ball_pawn_collision(ball, pawn):
