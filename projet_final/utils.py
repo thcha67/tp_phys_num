@@ -198,12 +198,6 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
     ball_velocity = best_direction * new_velocity_magnitude
     return ball_velocity
 
-def change_hand_identifier_color(hand_idx : int, player : Player, hand_iden : box):
-    if hand_idx in player.hand_positions:
-            hand_iden.color = player.color
-    else:
-        hand_iden.color = color.gray(0.5)
-
 def pass_ball(pawn, rod_pawns, new_velocity_magnitude):
     # find the rod pawn that is the closest to the position y=0
     other_pawns = [rod_pawn for rod_pawn in rod_pawns if rod_pawn != pawn]
@@ -254,3 +248,10 @@ def is_hand_available(hand_number, transition_cooldowns):
         return True
     else:
         return False
+    
+def change_hand_identifier_color(hand_idx : int, player : Player, hand_iden : box):
+    if hand_idx in player.hand_positions:
+        if is_hand_available(hand_idx, player.transition_cooldown):
+            hand_iden.color = player.color
+    else:
+        hand_iden.color = color.gray(0.5)
