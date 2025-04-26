@@ -2,6 +2,15 @@ import json
 import time
 from config import *
 import subprocess
+import os
+import sys
+
+STRATEGY_ENUM = (
+    "gk_all_time",
+    "opportunistic_attack",
+    "def_all_time",
+    "never_midfield"
+)
 
 AMOUNT_OF_GAMES_TO_SIMULATE = 5
 
@@ -59,8 +68,15 @@ data.append({
     }
 })
 
-with open('simulation_data.json', 'w') as json_file:
+# Define output file name
+filename = f"./simulation_results/{STRATEGY_ENUM[player0["strategy"]]}-{STRATEGY_ENUM[player1["strategy"]]}-{AMOUNT_OF_GAMES_TO_SIMULATE}-{data[0]['start_time'].replace(' ', '_')}.json"
+filepath = os.path.join(os.getcwd(), filename)
+
+with open(filename, 'w') as json_file:
     json.dump(data, json_file, indent = 4)
 
+import babyfoot_table_vpython
+babyfoot_table_vpython.set_seed(0)
+
 for i in range(AMOUNT_OF_GAMES_TO_SIMULATE):
-    subprocess.run(["python", "tp_phys_num/projet_final/babyfoot_table_vpython.py"])
+    babyfoot_table_vpython.main(filepath)

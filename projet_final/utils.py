@@ -8,7 +8,7 @@ def update_score(teamNumber : int, score, score_label):
     score[teamNumber] = score[teamNumber] + 1
     score_label.text = f"{score[0]}    :   {score[1]}"
 
-    if score[teamNumber] == 10:
+    if score[teamNumber] == 1:
         return True
     return False
 
