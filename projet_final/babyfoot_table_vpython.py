@@ -45,9 +45,6 @@ blue_posts = [
     sphere(pos=vector(-TABLE_LENGTH/2, NET_WIDTH/2, 1), visible=False, color=color.blue, radius=20)
 ]
 
-
-maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]**2) #maximal distance between the ball and the player to be considered as a collision
-
 most_recent_pawn = None
 displacement_error = np.random.normal(0, 5)
 gameOver = False
@@ -100,13 +97,12 @@ while not gameOver:
 
         #calculate the displacement of each rod
         for i, rod_index in enumerate(player.hand_positions):
-            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_index, i, displacement_error, opposing_posts)
+            displacement = player.calculate_rod_displacement(ball, ball_velocity, player_pawns, rod_index, displacement_error, opposing_posts)
             player.move_rod(rod_index, displacement, player_pawns)
 
         #change the color of the hand identifiers
-        transition_idx = 0
         for i, hand_iden in enumerate(hand_identifiers[player.team*4 : (player.team+1) * 4]):
-            change_hand_identifier_color(transition_idx, i, player, hand_iden)
+            change_hand_identifier_color(i, player, hand_iden)
 
         closest_rod_to_ball = np.argmin(abs(player.rod_positions - ball.pos.x))
 
