@@ -71,7 +71,6 @@ class Player():
                 if self.hand_positions[i] != new_hand_positions[i]:
                     new_transition_time = np.random.normal(1-self.transition_speed/20, 0.1)
                     self.transition_cooldown[new_hand_positions[i]] = new_transition_time
-                    print(self.team, self.transition_cooldown)
             
         self.hand_positions = new_hand_positions
 

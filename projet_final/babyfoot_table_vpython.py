@@ -45,9 +45,6 @@ blue_posts = [
     sphere(pos=vector(-TABLE_LENGTH/2, NET_WIDTH/2, 1), visible=False, color=color.blue, radius=20)
 ]
 
-
-maximal_dist_of_collision = BALL_RADIUS + np.sqrt(PAWN_SIZE[0]**2 + PAWN_SIZE[1]**2) #maximal distance between the ball and the player to be considered as a collision
-
 most_recent_pawn = None
 displacement_error = np.random.normal(0, 5)
 gameOver = False
