@@ -180,10 +180,8 @@ def set_seed(seed : int):
     np.random.seed(seed)
 
 if __name__ == '__main__':
-    pass
-else:
-    manually_defined_path = None
-    manually_defined_seed = None
+    manually_defined_path = "./simulation_results/_temp.json"
+    manually_defined_seed = 1745757283
 
     if manually_defined_path is None:
         pass
@@ -191,6 +189,14 @@ else:
         # If seed is given, set it up
         if manually_defined_seed is not None:
             np.random.seed(manually_defined_seed)
+            print("Simulation started with seed:", manually_defined_seed)
+        else:
+            # If no seed is given, set a random seed
+            auto_generated_seed = int(time.time())
+            np.random.seed(auto_generated_seed)
+            print("Simulation started with seed:", auto_generated_seed)
 
         # Execute simulation
         main(manually_defined_path)
+else:
+    pass
