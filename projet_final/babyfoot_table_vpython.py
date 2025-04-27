@@ -181,7 +181,7 @@ def set_seed(seed : int):
 
 if __name__ == '__main__':
     manually_defined_path = "./simulation_results/_temp.json"
-    manually_defined_seed = 1745757283
+    manually_defined_seed = None
 
     if manually_defined_path is None:
         pass
