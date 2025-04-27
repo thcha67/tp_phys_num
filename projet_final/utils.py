@@ -90,8 +90,8 @@ def generate_borders():
     return [upper_border, lower_border]
 
 def faceoff(ball : sphere):
-    #ball.pos.x, ball.pos.y = 0, -TABLE_WIDTH/2+20
-    #ball_velocity = vector(0,0,0)
+    #ball.pos.x, ball.pos.y = -450, 0
+    #ball_velocity = vector(-40,0,0)
     ball.pos.x, ball.pos.y = np.random.uniform(-20, 20), np.random.uniform(-TABLE_WIDTH/3, TABLE_WIDTH/3)
     ball_velocity = vector(np.random.uniform(-20, 20), np.random.uniform(-20, 20), 0)
 
@@ -200,9 +200,9 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
             best_direction = direction
 
     # center a distribution on the best direction, the std dev depends on the player's technique
-    min_angle = np.arctan2(min_vector.y, min_vector.x)
-    max_angle = np.arctan2(max_vector.y, max_vector.x)
-    half_angle_range = abs(max_angle - min_angle)/2
+    #min_angle = np.arctan2(min_vector.y, min_vector.x)
+    #max_angle = np.arctan2(max_vector.y, max_vector.x)
+    half_angle_range = min_vector.diff_angle(max_vector) / 2
     best_angle = np.arctan2(best_direction.y, best_direction.x)
 
     # new angle std from 0.1 (technique 10) to 1 (technique 0)
@@ -215,7 +215,7 @@ def controlled_shot(closest_rod_to_ball, ball, pawns, player, posts, new_velocit
     #     arrow(pos=ball.pos, axis=direction*100, color=color.red, shaftwidth=0.5)
     # arrow(pos=ball.pos, axis=best_direction*200, color=color.blue, shaftwidth=1)
     # arrow(pos=ball.pos, axis=new_direction*200, color=color.purple, shaftwidth=1)
-    # time.sleep(1)
+    # time.sleep(2)
     # Apply redirection
     ball_velocity = new_direction * new_velocity_magnitude
     return ball_velocity

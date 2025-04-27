@@ -99,6 +99,7 @@ def main(outputfile : str):
 
         #check if players changes hand position, and move the rods. Also check for collisions with the pawns
         for player in players:
+            
             player_pawns = pawns[player.team]
             player.move_hands(ball)
 
@@ -148,8 +149,7 @@ def main(outputfile : str):
                         if relative_incoming_angle == np.pi/2: # ball is coming from the top or bottom of the pawn (from a pass)
                             ball_velocity = diffuse_reflection(ball_velocity)
                         else:
-                            pass
-                        ball_velocity = specular_reflection(ball_velocity, reflection_normal)
+                            ball_velocity = specular_reflection(ball_velocity, reflection_normal)
 
                     most_recent_pawn = pawn
                     displacement_error = np.random.normal(0, -1.6*player.reflexes + 20)
