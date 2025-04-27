@@ -163,28 +163,40 @@ class Results:
 
 
 if __name__ == "__main__":
-    player0 = {
-        "reflexes": 5,
-        "transition_speed": 5,
-        "strength": 5,
-        "technique": 5,
-        "strategy": 0
-    }
-    player1 = {
-        "reflexes": 5,
-        "transition_speed": 5,
-        "strength": 5,
-        "technique": 5,
-        "strategy": 0
-    }
-    simulation = Simulation(player0, player1)
-    simulation.init_simulation_cfg()
-    #simulation.set_custom_seed(465457)
-    simulation.run_simulation(50)
+    simulation = False
 
-    results = simulation.get_results()
-    print("Simulation results:")
-    print("Player 0:", results["player0"])
-    print("Player 1:", results["player1"])
+    if simulation:
+        player0 = {
+            "reflexes": 5,
+            "transition_speed": 5,
+            "strength": 5,
+            "technique": 5,
+            "strategy": 0
+        }
+        player1 = {
+            "reflexes": 5,
+            "transition_speed": 5,
+            "strength": 5,
+            "technique": 5,
+            "strategy": 0
+        }
+        simulation = Simulation(player0, player1)
+        simulation.init_simulation_cfg()
+        #simulation.set_custom_seed(465457)
+        simulation.run_simulation(100)
 
-    print("Simulation completed.")
+        results = simulation.get_results()
+        print("Simulation results:")
+        print("Player 0:", results["player0"])
+        print("Player 1:", results["player1"])
+
+        print("Simulation completed.")
+    else :
+        results = Results("test.json")
+        results.load_results()
+        results.parse_results()
+
+        print("Player0 total points :", sum(results.data["player0"]["score"]))
+        print("Player1 total points :", sum(results.data["player1"]["score"]))
+        print("Player0 total wins :", results.data["player0"]["win"])
+        print("Player1 total wins :", results.data["player1"]["win"])
