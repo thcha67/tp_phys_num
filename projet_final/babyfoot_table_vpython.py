@@ -14,10 +14,10 @@ def main(outputfile : str):
     simulation_time = 0
 
     # Set up the scene
-    scene = canvas(title='Babyfoot Table', width=800, height=600, userzoom=False)
+    canvas(title='Babyfoot Table', width=800, height=600, userzoom=False)
 
     # Create the table
-    table = box(pos=vector(0, 0, 0), size=vector(TABLE_LENGTH, TABLE_WIDTH, 0.1), color=color.green)
+    box(pos=vector(0, 0, 0), size=vector(TABLE_LENGTH, TABLE_WIDTH, 0.1), color=color.green)
     score_box = box(pos=vector(0, TABLE_WIDTH/2 + 100,10), size=vector(250,100,0), color=color.gray(0.5))
     score_label = label(pos=score_box.pos, text=f"{score[0]}    :   {score[1]}", xoffset=0, yoffset=0, space=score_box.size.x, height=25, border=4, font='sans')
     time_box = box(pos=vector(250, TABLE_WIDTH/2 + 100,10), size=vector(200,100,0), color=color.gray(0.5))
