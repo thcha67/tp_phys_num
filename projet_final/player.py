@@ -39,7 +39,7 @@ class Player():
         with open(f"player{self.team}.json", "r") as f:
             player_config = json.load(f)
 
-        reflex_mutliplier = 150 # magic number to give the possible displacement per DT per reflexes stat point
+        reflex_mutliplier = 100 # magic number to give the possible displacement per DT per reflexes stat point
 
         self.reflexes = player_config["reflexes"]*DT*reflex_mutliplier # 0 to 10
         self.transition_speed = player_config["transition_speed"]# 0 to 10
