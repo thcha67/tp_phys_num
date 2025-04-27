@@ -50,19 +50,26 @@ def main(outputfile : str):
     displacement_error = np.random.normal(0, 5)
     gameOver = False
 
-    last_player_who_touched_ball = None
+    time_since_last_collision = 0
 
     while not gameOver:
         rate(TIME_MULTIPLIER/DT) # control the simulation speed
         simulation_time += DT
         time_label.text = f"{round(simulation_time, 4)}s"
+
+        time_since_last_collision += DT
+
+        if time_since_last_collision > 5: # faceofff if no collision for 5s
+            ball, ball_velocity = faceoff(ball)
+            time_since_last_collision = 0
+
         # Move the ball
         ball.pos += ball_velocity * DT
 
         # apply friction, 0 = no friction
         apply_air_friction(ball_velocity)
-        if mag(ball_velocity) < BALL_MIN_VELOCITY:
-            ball, ball_velocity = faceoff(ball)
+        # if mag(ball_velocity) < BALL_MIN_VELOCITY:
+        #     ball, ball_velocity = faceoff(ball)
 
         # Check for collisions with table boundaries
         if abs(ball.pos.x) >= TABLE_LENGTH/2 - BALL_RADIUS:
@@ -117,6 +124,8 @@ def main(outputfile : str):
                 reflection_normal = check_ball_pawn_collision(ball, pawn)
 
                 if reflection_normal is not None: # collision detected
+                    time_since_last_collision = 0
+
                     relative_incoming_angle = reflection_normal.diff_angle(vector(1 - 2*player.team, 0, 0)) # pi: from the back, pi/2 on top or bottom, 0 from the front
 
                     # ball cannot be controlled if the player's hand is not on the rod or if the player is not available to control the ball
@@ -137,6 +146,8 @@ def main(outputfile : str):
                     else:
                         if relative_incoming_angle == np.pi/2: # ball is coming from the top or bottom of the pawn (from a pass)
                             ball_velocity = diffuse_reflection(ball_velocity)
+                        else:
+                            pass
                         ball_velocity = specular_reflection(ball_velocity, reflection_normal)
 
                     most_recent_pawn = pawn
@@ -178,7 +189,7 @@ def set_seed(seed : int):
 
 if __name__ == '__main__':
     manually_defined_path = "./simulation_results/_temp.json"
-    manually_defined_seed = None
+    manually_defined_seed = 1745762052
 
     if manually_defined_path is None:
         pass
