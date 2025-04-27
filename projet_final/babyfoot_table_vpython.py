@@ -177,8 +177,8 @@ def set_seed(seed : int):
     np.random.seed(seed)
 
 if __name__ == '__main__':
-    manually_defined_path = "simulation_data.json" # Path to the output file
-    manually_defined_seed = np.random.randint(0, 100000) # Seed for the random number generator
+    manually_defined_path = "./simulation_results/_temp.json"
+    manually_defined_seed = None
 
     if manually_defined_path is None:
         pass
