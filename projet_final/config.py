@@ -4,6 +4,7 @@ import os
 DEFAULT_TABLE_CONFIG = {
     "table_length": 1140,
     "table_width": 700,
+    "spring_length": 30,
     "pawn_size": [11, 21, 1],
     "pawn_corner_radius": 3,
     "pawn_separation": [335, 122, 215],

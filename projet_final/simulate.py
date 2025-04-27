@@ -26,10 +26,16 @@ class Simulation :
         if self.player0 is None:
             with open('player0.json', 'r') as json_file:
                 self.player0 = json.load(json_file)
+        else:
+            with open('player0.json', 'w') as json_file:
+                json.dump(self.player0, json_file)
 
         if self.player1 is None:
             with open('player1.json', 'r') as json_file:
                 self.player1 = json.load(json_file)
+        else:
+            with open('player1.json', 'w') as json_file:
+                json.dump(self.player1, json_file)
 
         self.data.append({
             "start_time" : time.strftime("%Y-%m-%d %H:%M:%S"),
@@ -78,8 +84,9 @@ class Simulation :
         })
 
         # Define output file name
-        filename = f"./simulation_results/{STRATEGY_ENUM[player0["strategy"]]}-{STRATEGY_ENUM[player1["strategy"]]}-{AMOUNT_OF_GAMES_TO_SIMULATE}-{self.data[0]['start_time'].replace(' ', '_')}.json"
-        self.filepath = os.path.join(os.getcwd(), filename)
+        #self.filepath = f"simulation_results\\{STRATEGY_ENUM[player0["strategy"]]}-{STRATEGY_ENUM[player1["strategy"]]}-{AMOUNT_OF_GAMES_TO_SIMULATE}-{self.data[0]['start_time'].replace(' ', '_')}.json"
+        self.filepath = "test.json"
+        #self.filepath = os.path.join(os.getcwd(), filename)
 
         with open(self.filepath, 'w') as json_file:
             json.dump(self.data, json_file, indent = 4)
@@ -157,22 +164,22 @@ class Results:
 
 if __name__ == "__main__":
     player0 = {
-        "reflexes": 10,
-        "transition_speed": 10,
-        "strength": 10,
-        "technique": 10,
+        "reflexes": 5,
+        "transition_speed": 5,
+        "strength": 5,
+        "technique": 5,
         "strategy": 0
     }
     player1 = {
-        "reflexes": 10,
-        "transition_speed": 10,
-        "strength": 10,
-        "technique": 10,
+        "reflexes": 5,
+        "transition_speed": 5,
+        "strength": 5,
+        "technique": 5,
         "strategy": 0
     }
     simulation = Simulation(player0, player1)
     simulation.init_simulation_cfg()
-    simulation.set_custom_seed(345)
+    #simulation.set_custom_seed(465457)
     simulation.run_simulation(50)
 
     results = simulation.get_results()
