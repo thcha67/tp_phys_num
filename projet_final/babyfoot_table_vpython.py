@@ -52,10 +52,12 @@ def main(outputfile : str):
 
     time_since_last_collision = 0
 
+    # Set the simulation time step
+    rate(TIME_MULTIPLIER/DT) # control the simulation speed
+
     while not gameOver:
-        rate(TIME_MULTIPLIER/DT) # control the simulation speed
         simulation_time += DT
-        time_label.text = f"{round(simulation_time, 4)}s"
+        time_label.text = f"{simulation_time:.2f}s"
 
         time_since_last_collision += DT
 
@@ -159,14 +161,14 @@ def main(outputfile : str):
             if is_ball_in_net(ball, net):
                 if net_number == 0:
                     gameOver = update_score(1, score, score_label)
-                    time.sleep(0.5)
+                    #time.sleep(0.5)
                     ball, ball_velocity = faceoff(ball)
-                    time.sleep(0.5)
+                    #time.sleep(0.5)
                 else:
                     gameOver = update_score(0, score, score_label)
-                    time.sleep(0.5)
+                    #time.sleep(0.5)
                     ball, ball_velocity = faceoff(ball)
-                    time.sleep(0.5)
+                    #time.sleep(0.5)
             net_number += 1
 
     data = []
@@ -183,6 +185,8 @@ def main(outputfile : str):
 
     with open(outputfile, 'w') as json_file:
         json.dump(data, json_file, indent = 4)
+
+    scene.delete() 
 
 def set_seed(seed : int):
     np.random.seed(seed)
