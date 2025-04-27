@@ -23,8 +23,8 @@ def main(outputfile : str):
     time_box = box(pos=vector(250, TABLE_WIDTH/2 + 100,10), size=vector(200,100,0), color=color.gray(0.5))
     time_label = label(pos=time_box.pos, text=f"{simulation_time}s", xoffset=0, yoffset=0, space=score_box.size.x, height=25, border=4, font='sans')
 
-    rods = generate_rods()
-    pawns, individual_pawns = generate_pawns()
+    generate_rods()
+    pawns = generate_pawns()
     hand_identifiers = generate_hand_identifiers()
     triangles, borders = generate_triangles(), generate_borders()
 
@@ -50,7 +50,6 @@ def main(outputfile : str):
     displacement_error = np.random.normal(0, 5)
     gameOver = False
 
-    last_player_who_touched_ball = None
 
     while not gameOver:
         rate(TIME_MULTIPLIER/DT) # control the simulation speed
@@ -117,9 +116,6 @@ def main(outputfile : str):
                 reflection_normal = check_ball_pawn_collision(ball, pawn)
 
                 if reflection_normal is not None: # collision detected
-                    last_player_who_touched_ball = player.team
-
-
                     relative_incoming_angle = reflection_normal.diff_angle(vector(1 - 2*player.team, 0, 0)) # pi: from the back, pi/2 on top or bottom, 0 from the front
 
                     # ball cannot be controlled if the player's hand is not on the rod
