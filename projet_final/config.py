@@ -87,6 +87,7 @@ not_exportable = [
     "DEFAULT_SIMULATION_CONFIG",
     "table_config",
     "simulation_config",
+    "__name__",
 ]
 
 # When using `from config import *`, we want to export all variables except the ones in `not_exportable`

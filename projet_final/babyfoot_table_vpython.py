@@ -175,6 +175,7 @@ def main(outputfile : str):
 def set_seed(seed : int):
     np.random.seed(seed)
 
+
 if __name__ == '__main__':
     pass
 else:
