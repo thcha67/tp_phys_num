@@ -121,6 +121,8 @@ def main(outputfile : str):
             rod_pawns = player_pawns[closest_rod_to_ball]
 
             for pawn in rod_pawns: # check for collisions with the closest rod to the ball
+                if time_since_last_collision > 0.75:
+                    most_recent_pawn = None #In case ball goes on a triangle and comes back
                 if pawn == most_recent_pawn:
                     continue
                 reflection_normal = check_ball_pawn_collision(ball, pawn)
@@ -152,7 +154,7 @@ def main(outputfile : str):
                             ball_velocity = specular_reflection(ball_velocity, reflection_normal)
 
                     most_recent_pawn = pawn
-                    displacement_error = np.random.normal(0, -1.6*player.reflexes + 20)
+                    displacement_error = np.random.normal(0, -1.6*player.reflexes/DT/100 + 20) #divided by DT and reflex multiplier
                     break
 
         net_number = 0

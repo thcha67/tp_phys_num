@@ -109,11 +109,11 @@ def is_ball_in_net(ball : sphere, net : box):
 
 def inelastic_collision(ball_velocity : vector , collision_object : str):
     if collision_object == "table_boundary_x":
-        velocity_factor = min(np.random.normal(0.6, 0.2), 0.9)
+        velocity_factor = min(np.random.normal(0.7, 0.2), 0.9)
     elif collision_object == "table_boundary_y":
         velocity_factor  = min(np.random.normal(0.8, 0.1), 0.9)
     else: #collision with pawns
-        velocity_factor  = min(np.random.normal(0.6, 0.3), 0.9)
+        velocity_factor  = min(np.random.normal(0.7, 0.15), 0.9)
     ball_velocity *= velocity_factor
     return ball_velocity
 
